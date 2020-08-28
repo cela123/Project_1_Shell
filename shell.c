@@ -21,8 +21,13 @@ int main()
 			printf("token %d: (%s)\n", i, tokens->items[i]);
 		}
 
+		if(*(tokens->items[0]) == '$'){
+			printf("Hi\n"); 
+		}		
+
 		free(input);
 		free_tokens(tokens);
+
 	}
 
 	return 0;
