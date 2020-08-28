@@ -4,8 +4,6 @@
 #include "parser.h"
 
 int main()
-string envVar;
-
 {
 	while (1) {
 		printf("> ");
@@ -22,9 +20,14 @@ string envVar;
 			printf("token %d: (%s)\n", i, tokens->items[i]);
 
       if(*(tokens->items[i]) == '$'){
-        char temp[strlen(tokens->items[i])];
-        printf("Temp is: %s\n", temp);
-        printf("Tempsize is: %d\n", strlen(temp));
+        char tempStr[strlen(tokens->items[i])];
+
+				strcpy(tempStr, tokens->items[i]);
+				if(tempStr[0] == '$')
+					memmove(tempStr, tempStr+1, strlen(tempStr));
+
+        printf("Temp is: %s\n", tempStr);
+        printf("Tempsize is: %d\n", strlen(tempStr));
         //while(i < tokens->size)
           //temp[i-1] = tokens->items[i];
 
@@ -42,7 +45,7 @@ string envVar;
 
 		if(*(tokens->items[0]) == '$'){
 			printf("Hi\n");
-		}*/		
+		}*/
 
 		free(input);
 		free_tokens(tokens);
