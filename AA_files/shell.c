@@ -6,7 +6,7 @@
 int main()
 {
 	while (1) {
-		printf("> ");
+		printf("%s@%s : %s > ", getenv("USER"), getenv("MACHINE"), getenv("PWD"));
 
 		/* input contains the whole command
 		 * tokens contains substrings from input split by spaces
@@ -23,29 +23,16 @@ int main()
         char tempStr[strlen(tokens->items[i])];
 
 				strcpy(tempStr, tokens->items[i]);
-				if(tempStr[0] == '$')
+			  if(tempStr[0] == '$')
 					memmove(tempStr, tempStr+1, strlen(tempStr));
 
-        printf("Temp is: %s\n", tempStr);
+        printf("%s dereferenced: %s\n", tempStr, getenv(tempStr));
         printf("Tempsize is: %d\n", strlen(tempStr));
-        //while(i < tokens->size)
-          //temp[i-1] = tokens->items[i];
+
 
         printf("Hi\n");
   		}
 		}
-
-		/*for (int i = 0; i < tokens->size; i++) {
-			if(*(tokens->items[i]) == '$'){
-				while(*(tokens->items[i]) != ' ' ){
-					envVar += *(tokens->items[i])
-				}
-			}
-		}
-
-		if(*(tokens->items[0]) == '$'){
-			printf("Hi\n");
-		}*/
 
 		free(input);
 		free_tokens(tokens);
