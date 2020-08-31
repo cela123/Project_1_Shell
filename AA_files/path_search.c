@@ -7,32 +7,34 @@ void search_for_path_command(char* command)
 {
 	char * mainPATH = getenv("PATH");
 
-	//parse path into an array of c-strings
 	char ** parsedPATH = NULL;
 	char * tok = strtok (mainPATH, ":");
-	int spaces = 0;
+	int size = 0;
 
-	//loop until tok false, to the proper amount of space for each sub-path of $PATH
+	//allocates space based on the size of each individual path, also determines size of array
 	while(tok)
 	{
-		parsedPATH = realloc(parsedPATH, sizeof(char*) * ++spaces);
+		parsedPATH = realloc(parsedPATH, sizeof(char*) * ++size);
 
-		if (parsedPATH == NULL)		//exit if mem-allocation fails
+		if (parsedPATH == NULL)
 			exit(-1);
 
-		parsedPATH[spaces-1] = tok;
+		parsedPATH[size-1] = tok;	
 		tok = strtok(NULL, ":");
 	}
 
-	//terminate array with NULL character
-	parsedPATH = realloc (parsedPATH, sizeof(char*) * spaces+1);
-	parsedPATH[spaces] = 0;
+	//null-termination of array
+	parsedPATH = realloc (parsedPATH, sizeof(char*) * size+1);
+	parsedPATH[size] = 0;
 
-	for (int i = 0; i < (spaces+1); i++)
+	//print for checking
+	for (int i = 0; i < (size+1); i++)
   		printf ("parsedPATH[%d] = %s\n", i, parsedPATH[i]);
 	
+	printf("size unaltered: %d; size alted: %d", size, size-1);
 	printf("The passed in command is %s\n", command);
-	
+	//printf("The strlen(pathParse) is: %d\n", strlen(pathParse));
 }
+
 
 
