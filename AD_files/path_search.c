@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "parser.h"
-#include "path_search.h"
 
 int main()
 {
@@ -16,11 +15,11 @@ int main()
 		tokenlist *tokens = get_tokens(input);
 		for (int i = 0; i < tokens->size; i++) 
 		{
-			search_for_path_command(tokens->items[i]);
-			//printf("token %d: (%s)\n", i, tokens->items[i]);
+			printf("token %d: (%s)\n", i, tokens->items[i]);
 			char tempStr[strlen(tokens->items[i])];
       		if(*(tokens->items[i]) == '$')
 			{
+        		//char tempStr[strlen(tokens->items[i])];
 				strcpy(tempStr, tokens->items[i]);
 				memmove(tempStr, tempStr+1, strlen(tempStr));
 	        	printf("%s dereferenced: %s\n", tempStr, getenv(tempStr));
@@ -31,7 +30,6 @@ int main()
 				memmove(tempStr, tempStr+1, strlen(tempStr));
 				printf("%s%s\n", getenv("HOME"), tempStr);
 			}
-			
 		}
 
 		free(input);
