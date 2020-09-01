@@ -3,5 +3,4 @@
 //search for the command within $PATH
 //if not within $PATH then display an error message command not found
 
-void search_for_path_command (char*);
-int doesCommandExist(const char*);
+void search_and_execute_command (char*);
