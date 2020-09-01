@@ -70,9 +70,9 @@ int main()
 				printf("executing built-in jobs\n"); 
 			}
 			else{
-				//search_and_execute_command(tokens->items[i]); 
+				search_and_execute_command(tokens->items[i]); 
 			}	
-			search_and_execute_command(tokens->items[i]);
+
 			
 		}
 
