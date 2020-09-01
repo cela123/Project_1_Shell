@@ -8,10 +8,16 @@ void search_and_execute_command (char* command)
 {
 	char * mainPATH = getenv("PATH");
 
+	char * copyPATH;
+	strcpy(copyPATH, mainPATH);
+
+	printf("mainPATH: %s\n", copyPATH);
+
 	char ** parsedPATH = NULL;
-	char * tok = strtok (mainPATH, ":");
+	char * tok = strtok (copyPATH, ":");
 	int size = 0;
 
+	
 	//allocates space based on the size of each individual path, also determines size of array
 	while(tok)
 	{
@@ -30,6 +36,7 @@ void search_and_execute_command (char* command)
 	parsedPATH = realloc (parsedPATH, sizeof(char*) * size+1);
 	parsedPATH[size] = 0;
 
+	//
 	for (int i = 0; i < (size+1); i++)
   	{
 		if(parsedPATH[i] != NULL)
@@ -48,11 +55,6 @@ void search_and_execute_command (char* command)
 	printf("The passed in command is %s\n", command);
 
 	int count = 0;
-	/*while(parsedPATH[count] != NULL)
-	{
-		free(parsedPATH[count]);
-		count++;
-	}*/
 
 	free(parsedPATH);
 }
