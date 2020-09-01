@@ -1,0 +1,7 @@
+//Part 5) $PATH search
+//when a command is not starting with / or built-in
+//search for the command within $PATH
+//if not within $PATH then display an error message command not found
+
+void search_and_execute_command (char*);
+int doesFileExist(char*);
