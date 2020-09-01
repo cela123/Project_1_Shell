@@ -1,41 +1,64 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "parser.h"
+#include <unistd.h>
+#include "path_search.h"
 
-int main()
+void search_and_execute_command (char* command)
 {
-	while (1) 
+	char * mainPATH = getenv("PATH");
+
+	char * copyPATH;
+	strcpy(copyPATH, mainPATH);
+
+	printf("mainPATH: %s\n", copyPATH);
+
+	char ** parsedPATH = NULL;
+	char * tok = strtok (copyPATH, ":");
+	int size = 0;
+
+	
+	//allocates space based on the size of each individual path, also determines size of array
+	while(tok)
 	{
-		printf("%s@%s : %s > ", getenv("USER"), getenv("MACHINE"), getenv("PWD"));
+		parsedPATH = realloc(parsedPATH, (sizeof(char*) * ++size));
 
-		char *input = get_input();
-		printf("whole input: %s\n", input);
+		if (parsedPATH == NULL)
+			exit(-1);
 
-		tokenlist *tokens = get_tokens(input);
-		for (int i = 0; i < tokens->size; i++) 
-		{
-			printf("token %d: (%s)\n", i, tokens->items[i]);
-			char tempStr[strlen(tokens->items[i])];
-      		if(*(tokens->items[i]) == '$')
-			{
-        		//char tempStr[strlen(tokens->items[i])];
-				strcpy(tempStr, tokens->items[i]);
-				memmove(tempStr, tempStr+1, strlen(tempStr));
-	        	printf("%s dereferenced: %s\n", tempStr, getenv(tempStr));
-  			}
-			else if(*(tokens->items[i]) == '~')
-			{
-				strcpy(tempStr, tokens->items[i]);
-				memmove(tempStr, tempStr+1, strlen(tempStr));
-				printf("%s%s\n", getenv("HOME"), tempStr);
-			}
-		}
+		parsedPATH[size-1] = tok;
+		tok = strtok(NULL, ":");
 
-		free(input);
-		free_tokens(tokens);
-
+		//printf("%s\n",parsedPATH[size-1]);
 	}
 
-	return 0;
+	//null-termination of array
+	parsedPATH = realloc (parsedPATH, sizeof(char*) * size+1);
+	parsedPATH[size] = 0;
+
+	//
+	for (int i = 0; i < (size+1); i++)
+  	{
+		if(parsedPATH[i] != NULL)
+		{
+			int size_0 = strlen(parsedPATH[i]) + strlen(command) + 1;
+			char temp[size_0];
+			strcpy(temp, parsedPATH[i]);
+			strcat(temp, "/");
+			strcat(temp, command);
+			printf("temp at %d: %s\n", i, temp);
+		}
+		//printf ("parsedPATH[%d] = %s\n", i, parsedPATH[i]);
+	}
+	
+	printf("size unaltered: %d; size alted: %d\n", size, size-1);
+	printf("The passed in command is %s\n", command);
+
+	int count = 0;
+
+	free(parsedPATH);
 }
+
+
+
+
