@@ -1,3 +1,4 @@
+#include <unistd.h>
 /* PIPING SCHEME
     stdin -> 0 -> 0 -> 0 -> stdout 
 */
