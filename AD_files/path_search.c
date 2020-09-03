@@ -86,3 +86,5 @@ int does_command_exist(char* path)
 	fclose(check);
 	return 1;
 }
+
+

@@ -6,7 +6,7 @@
 
 int main()
 {
-	const char * built_in_commands[] = {"exit", "cd", "echo", "jobs"}; 	//think about how we're going to call part 5
+	//const char * built_in_commands[] = {"exit", "cd", "echo", "jobs"}; 	//think about how we're going to call part 5
 	while (1) 
 	{
 		printf("%s@%s : %s > ", getenv("USER"), getenv("MACHINE"), getenv("PWD"));
@@ -31,7 +31,23 @@ int main()
 				memmove(tempStr, tempStr+1, strlen(tempStr));
 				printf("%s%s\n", getenv("HOME"), tempStr);
 			}
-			search_for_command(tokens->items[i], tokens);
+			//checking if input is a built-in command and executing if it is
+			else if(strcmp(tokens->items[i], "exit")==0){
+				printf("executing built-in exit\n"); 
+			}
+			else if(strcmp(tokens->items[i], "cd")==0){
+				printf("executing built-in cd\n"); 
+			}	
+			else if(strcmp(tokens->items[i], "echo")==0){
+				printf("executing built-in echo\n"); 
+			}		
+			else if(strcmp(tokens->items[i], "jobs")==0){
+				printf("executing built-in jobs\n"); 
+			}
+			else{
+				search_for_command(tokens->items[i], tokens);
+			}
+
 			
 		}
 
