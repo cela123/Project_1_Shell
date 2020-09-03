@@ -71,9 +71,11 @@ int main()
 			else if(strcmp(tokens->items[i], built_in_commands[3])==0){
 				printf("executing built-in jobs\n"); 
 			}
+			//checks for '/' in user input and executes given input
 			else if(has_slash(tokens->items[i]) == 1){
 				printf("user input has slashes\n");
-			} //needs to be another else if checking for slashes
+				execv(tokens->items[i]); 
+			} 
 			else{
 				search_for_command(tokens->items[i]); 
 			}	
@@ -92,7 +94,7 @@ int main()
 	return 0;
 }
 
-//returns 1 if command has a slash, returns if it doesn't
+//returns 1 if command has a slash, returns 0 if it doesn't
 int has_slash(char* command){
 	int ret = 0; 
 	for(int i=0; i<strlen(command); i++){
