@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include "path_search.h"
 
-void search_and_execute_command (char* command)
+void search_for_command (char* command)
 {
 	char * mainPATH = getenv("PATH");
 
@@ -17,7 +17,7 @@ void search_and_execute_command (char* command)
 	char * tok = strtok (copyPATH, ":");
 	int size = 0;
 
-	//allocates space based on the size of each individual path, also determines size of array
+	//allocates space in array for each individual path
 	while(tok)
 	{
 		parsedPATH = realloc(parsedPATH, (sizeof(char*) * ++size));
@@ -25,7 +25,7 @@ void search_and_execute_command (char* command)
 		if (parsedPATH == NULL)
 			exit(-1);
 
-		parsedPATH[size-1] = tok;
+		parsedPATH[size-1] = tok;		//sets char pointer at size-1 to the token
 		tok = strtok(NULL, ":");
 	}
 
@@ -34,7 +34,9 @@ void search_and_execute_command (char* command)
 	parsedPATH[size] = 0;
 
 	//append command to a temp variable that is overwritten in each iteration to check then next path
-	for (int i = 0; i < (size+1); i++)
+	
+	int i;
+	for (i = 0; i < (size+1); i++)
   	{
 		if(parsedPATH[i] != NULL)
 		{
@@ -44,20 +46,32 @@ void search_and_execute_command (char* command)
 			strcat(temp, "/");
 			strcat(temp, command);
 			printf("temp at %d: %s\n", i, temp);
-			if(doesFileExist(temp))
+			if(does_command_exist(temp))
 			{
-				printf("The command at %s exists\n", temp);
-				break;
+				printf("Running Command\n");		//insert command execution here
+				//break;
 			}
 			else
-				printf("The command at %s doesn't exists\n", temp);
+			{
+				printf("command not found\n");
+				//commandNotFoundCounter++;
+			}
 		}
 	}
-	
+	printf("i is: %d\nsize is %d\n",i,size);
+	//if (commandNotFoundCounter == i)	
 	free(parsedPATH);
 }
 
-int doesFileExist(char* path)
+void execute_command(char* cmdpath)
+{
+	/*pid_t pid = fork();
+	if (pid == 0)
+	*/
+}
+
+// checks for exists of a command
+int does_command_exist(char* path)
 {
 	FILE * check = fopen(path, "r");
 	if (check == NULL)

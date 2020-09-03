@@ -4,4 +4,4 @@
 //if not within $PATH then display an error message command not found
 
 void search_and_execute_command (char*);
-int doesFileExist(char*);
+int doesCommandExist(char*);

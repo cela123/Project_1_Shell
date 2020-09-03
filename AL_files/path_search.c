@@ -44,7 +44,7 @@ void search_and_execute_command (char* command)
 			strcat(temp, "/");
 			strcat(temp, command);
 			printf("temp at %d: %s\n", i, temp);
-			if(doesFileExist(temp))
+			if(doesCommandExist(temp))
 			{
 				printf("The command at %s exists\n", temp);
 				break;
@@ -52,12 +52,12 @@ void search_and_execute_command (char* command)
 			else
 				printf("The command at %s doesn't exists\n", temp);
 		}
-	}
-	
+	}	
 	free(parsedPATH);
 }
 
-int doesFileExist(char* path)
+// checks for exists of a command
+int doesCommandExist(char* path)
 {
 	FILE * check = fopen(path, "r");
 	if (check == NULL)

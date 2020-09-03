@@ -17,7 +17,6 @@ int main()
 		tokenlist *tokens = get_tokens(input);
 		for (int i = 0; i < tokens->size; i++) 
 		{
-			
 			//printf("token %d: (%s)\n", i, tokens->items[i]);
 			char tempStr[strlen(tokens->items[i])];
       		if(*(tokens->items[i]) == '$')
@@ -32,7 +31,7 @@ int main()
 				memmove(tempStr, tempStr+1, strlen(tempStr));
 				printf("%s%s\n", getenv("HOME"), tempStr);
 			}
-			search_and_execute_command(tokens->items[i]);
+			search_for_command(tokens->items[i]);
 			
 		}
 
