@@ -20,7 +20,7 @@ int main()
 	while (1) 
 	{
 		//prompt format USER@MACHINE : PWD > (part 3)
-		printf("%s@%s : %s> ", getenv("USER"), getenv("MACHINE"), getenv("PWD"));
+		printf("%s@%s:%s> ", getenv("USER"), getenv("MACHINE"), getenv("PWD"));
 
 		//collects everything entered by user into input
 		char *input = get_input();
@@ -71,7 +71,7 @@ int main()
 			}
 			//needs to be another else if checking for slashes
 			else{
-				search_for_command(tokens->items[i]); s
+				search_for_command(tokens->items[i]); 
 			}	
 
 			
