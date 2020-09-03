@@ -11,9 +11,9 @@ void search_for_command (char* command, tokenlist* tokens)
 {
 	char * mainPATH = getenv("PATH");
 
-	char * copyPATH;
+	char * copyPATH = malloc(strlen(mainPATH));
 	strcpy(copyPATH, mainPATH);
-
+	
 	char ** parsedPATH = NULL;
 	char * tok = strtok (copyPATH, ":");
 	int size = 0;
@@ -51,7 +51,9 @@ void search_for_command (char* command, tokenlist* tokens)
 			{
 				printf("Running Command\n");		//insert command execution here
 				execute_command(temp_command, tokens);
-				break;
+				printf("After running command\n");
+				
+				break;		
 			}
 		}
 	}
@@ -65,7 +67,7 @@ void search_for_command (char* command, tokenlist* tokens)
 void execute_command(char* cmdpath, tokenlist* tokens)
 {
 	pid_t pid = fork();
-	if (pid == 0)
+	if (pid == 0)		//for some reason, this is getting called more then once occassionally
 	{
 		execv(cmdpath, tokens->items);
 		//fprintf(stderr, "child process couldn't execute command\n");
@@ -86,5 +88,9 @@ int does_command_exist(char* path)
 	fclose(check);
 	return 1;
 }
+
+
+
+
 
 
