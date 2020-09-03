@@ -74,7 +74,7 @@ int main()
 			//checks for '/' in user input and executes given input
 			else if(has_slash(tokens->items[i]) == 1){
 				printf("user input has slashes\n");
-				execv(tokens->items[i]); 
+				execute_command(tokens->items[i], token->items); 
 			} 
 			else{
 				search_for_command(tokens->items[i]); 

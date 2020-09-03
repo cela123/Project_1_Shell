@@ -6,7 +6,7 @@
 
 int main()
 {
-	const char * built_in_commands[] = {"exit", "cd", "echo", "jobs"}; 	//think about how we're going to call part 5
+	const char * built_in_commands[] = {"exit", "cd", "echo", "jobs"}; 	//think about how we're going to call part 5s
 	while (1) 
 	{
 		printf("%s@%s : %s > ", getenv("USER"), getenv("MACHINE"), getenv("PWD"));
