@@ -71,7 +71,7 @@ int main()
 			}
 			//needs to be another else if checking for slashes
 			else{
-				search_and_execute_command(tokens->items[i]); s
+				search_for_command(tokens->items[i]); s
 			}	
 
 			
