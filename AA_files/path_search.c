@@ -51,7 +51,9 @@ void search_for_command (char* command, tokenlist* tokens)
 			{
 				printf("Running Command\n");		//insert command execution here
 				execute_command(temp_command, tokens);
-				break;
+				printf("After running command\n");
+				
+				break;		
 			}
 		}
 	}
