@@ -11,9 +11,9 @@ void search_for_command (char* command, tokenlist* tokens)
 {
 	char * mainPATH = getenv("PATH");
 
-	char * copyPATH;
+	char * copyPATH = malloc(strlen(mainPATH));
 	strcpy(copyPATH, mainPATH);
-
+	
 	char ** parsedPATH = NULL;
 	char * tok = strtok (copyPATH, ":");
 	int size = 0;

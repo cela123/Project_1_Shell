@@ -45,6 +45,7 @@ int main()
 				printf("executing built-in jobs\n"); 
 			}
 			else{
+				printf("something\n");
 				search_for_command(tokens->items[i], tokens);
 			}
 
