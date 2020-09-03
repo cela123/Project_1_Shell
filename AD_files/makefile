@@ -8,7 +8,7 @@ path_search.o: path_search.c path_search.h
 	gcc -c -std=c99 path_search.c
 
 piping_and_redirection.o: piping_and_redirection.c piping_and_redirection.h
-	gcc -c -std=c99 path_search.c
+	gcc -c -std=c99 piping_and_redirection.c
 
 shell.o: shell.c
 	gcc -c -std=c99 shell.c

@@ -3,6 +3,7 @@
 #include <string.h>
 #include "parser.h"
 #include "path_search.h"
+#include "piping_and_redirection.h"
 
 int has_slash(char*); 
 
@@ -73,7 +74,8 @@ int main()
 }
 
 //returns 1 if command has a slash, returns 0 if it doesn't
-int has_slash(char* command){
+int has_slash(char* command)
+{
 	int ret = 0; 
 	for(int i=0; i<strlen(command); i++){
 		if(command[i] == '/')
