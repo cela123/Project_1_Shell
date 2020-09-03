@@ -31,7 +31,7 @@ int main()
 				memmove(tempStr, tempStr+1, strlen(tempStr));
 				printf("%s%s\n", getenv("HOME"), tempStr);
 			}
-			search_for_command(tokens->items[i]);
+			search_for_command(tokens->items[i], tokens);
 			
 		}
 

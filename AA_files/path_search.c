@@ -2,16 +2,17 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/wait.h>
+#include <sys/types.h>
+#include "parser.h"
 #include "path_search.h"
 
-void search_for_command (char* command)
+void search_for_command (char* command, tokenlist* tokens)
 {
 	char * mainPATH = getenv("PATH");
 
 	char * copyPATH;
 	strcpy(copyPATH, mainPATH);
-
-	printf("mainPATH: %s\n", copyPATH);
 
 	char ** parsedPATH = NULL;
 	char * tok = strtok (copyPATH, ":");
@@ -36,38 +37,44 @@ void search_for_command (char* command)
 	//append command to a temp variable that is overwritten in each iteration to check then next path
 	
 	int i;
-	for (i = 0; i < (size+1); i++)
+	for (i = 0; i < size; i++)
   	{
 		if(parsedPATH[i] != NULL)
 		{
 			int size_0 = strlen(parsedPATH[i]) + strlen(command) + 1;
-			char temp[size_0];
-			strcpy(temp, parsedPATH[i]);
-			strcat(temp, "/");
-			strcat(temp, command);
-			printf("temp at %d: %s\n", i, temp);
-			if(does_command_exist(temp))
+			char temp_command[size_0];
+			strcpy(temp_command, parsedPATH[i]);
+			strcat(temp_command, "/");
+			strcat(temp_command, command);
+			//printf("temp_command at %d: %s\n", i, temp_command);
+			if(does_command_exist(temp_command))
 			{
 				printf("Running Command\n");		//insert command execution here
-				//break;
-			}
-			else
-			{
-				printf("command not found\n");
-				//commandNotFoundCounter++;
+				execute_command(temp_command, tokens);
+				break;
 			}
 		}
 	}
-	printf("i is: %d\nsize is %d\n",i,size);
-	//if (commandNotFoundCounter == i)	
+
+	if (size == i)
+		printf("command not found\n");
+
 	free(parsedPATH);
 }
 
-void execute_command(char* cmdpath)
+void execute_command(char* cmdpath, tokenlist* tokens)
 {
-	/*pid_t pid = fork();
+	pid_t pid = fork();
 	if (pid == 0)
-	*/
+	{
+		execv(cmdpath, tokens->items);
+		//fprintf(stderr, "child process couldn't execute command\n");
+	}
+	else
+	{
+		waitpid(pid, NULL, 0);
+		printf("Child exited\n");
+	}
 }
 
 // checks for exists of a command
