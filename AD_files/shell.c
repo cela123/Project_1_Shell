@@ -4,6 +4,8 @@
 #include "parser.h"
 #include "path_search.h"
 
+int has_slash(char*); 
+
 int main()
 {
 	char *built_in_commands[] = {"exit", "cd", "echo", "jobs"};
@@ -69,7 +71,9 @@ int main()
 			else if(strcmp(tokens->items[i], built_in_commands[3])==0){
 				printf("executing built-in jobs\n"); 
 			}
-			//needs to be another else if checking for slashes
+			else if(has_slash(tokens->items[i]) == 1){
+				printf("user input has slashes\n");
+			} //needs to be another else if checking for slashes
 			else{
 				search_for_command(tokens->items[i]); 
 			}	
@@ -86,4 +90,16 @@ int main()
 	}
 
 	return 0;
+}
+
+//returns 1 if command has a slash, returns if it doesn't
+int has_slash(char* command){
+	int ret = 0; 
+	for(int i=0; i<strlen(command); i++){
+		if(command[i] == '/')
+			ret = 1; 
+	}
+
+	return ret; 
+
 }
