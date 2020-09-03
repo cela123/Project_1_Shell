@@ -1,10 +1,8 @@
-typedef struct {
-	int size;
-	char **items;
-} tokenlist;
+//Part 5) $PATH search
+//when a command is not starting with / or built-in
+//search for the command within $PATH
+//if not within $PATH then display an error message command not found
 
-tokenlist *new_tokenlist(void);
-void add_token(tokenlist *tokens, char *item);
-char *get_input(void);
-tokenlist *get_tokens(char *input);
-void free_tokens(tokenlist *tokens);
+void search_for_command (char*);
+void execute_command(char*);
+int does_command_exist(char*);
