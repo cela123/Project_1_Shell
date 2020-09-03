@@ -69,8 +69,9 @@ int main()
 			else if(strcmp(tokens->items[i], built_in_commands[3])==0){
 				printf("executing built-in jobs\n"); 
 			}
+			//needs to be another else if checking for slashes
 			else{
-				search_and_execute_command(tokens->items[i]); 
+				search_and_execute_command(tokens->items[i]); s
 			}	
 
 			
