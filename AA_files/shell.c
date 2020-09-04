@@ -8,6 +8,7 @@ int main()
 {
 	while (1) 
 	{
+		//fix cases where getenv($ENVVAR) DNE to null / empty string
 		printf("%s@%s : %s > ", getenv("USER"), getenv("MACHINE"), getenv("PWD"));
 
 		char *input = get_input();
@@ -17,37 +18,36 @@ int main()
 		for (int i = 0; i < tokens->size; i++) 
 		{
 			//printf("token %d: (%s)\n", i, tokens->items[i]);
-			char tempStr[strlen(tokens->items[i])];
-      		if(*(tokens->items[i]) == '$')
+			char tempStr[strlen(tokens->items[i])];		//dynamically allocated instead!!!!!!!!!!
+      		if(*(tokens->items[i]) == '$')		//little hack for 2/4 : eos defined by null and the variable (token[i]) defines start of string 
 			{
 				strcpy(tempStr, tokens->items[i]);
-				memmove(tempStr, tempStr+1, strlen(tempStr));
-	        	printf("%s dereferenced: %s\n", tempStr, getenv(tempStr));
+				memmove(tempStr, tempStr+1, strlen(tempStr));		//&tokens->items[i][1] instead 
+	        	printf("%s dereferenced: %s\n", tempStr, getenv(tempStr));		//printing null will crash (ie check if null) resolve to empty string and replace token in tokenlist (same as execute)
   			}
-			else if(*(tokens->items[i]) == '~')
+			if(*(tokens->items[i]) == '~')			//^--- replace token instead of just printing, you may have to do extra token operations in the future
 			{
 				strcpy(tempStr, tokens->items[i]);
 				memmove(tempStr, tempStr+1, strlen(tempStr));
 				printf("%s%s\n", getenv("HOME"), tempStr);
 			}
-			//checking if input is a built-in command and executing if it is
-			else if(strcmp(tokens->items[i], "exit")==0){
-				printf("executing built-in exit\n"); 
-			}
-			else if(strcmp(tokens->items[i], "cd")==0){
-				printf("executing built-in cd\n"); 
-			}	
-			else if(strcmp(tokens->items[i], "echo")==0){
-				printf("executing built-in echo\n"); 
-			}		
-			else if(strcmp(tokens->items[i], "jobs")==0){
-				printf("executing built-in jobs\n"); 
-			}
-			else{
-				search_for_command(tokens->items[i], tokens);
-			}
+			//checking if input is a built-in command and executing if it is		
+		}
 
-			
+		if(strcmp(tokens->items[0], "exit")==0){
+			printf("executing built-in exit\n"); 
+		}
+		else if(strcmp(tokens->items[0], "cd")==0){
+			printf("executing built-in cd\n"); 
+		}	
+		else if(strcmp(tokens->items[0], "echo")==0){
+			printf("executing built-in echo\n"); 
+		}		
+		else if(strcmp(tokens->items[0], "jobs")==0){
+			printf("executing built-in jobs\n"); 
+		}
+		else{	//first token is command, and tokens after pipe
+			search_for_command(tokens->items[0], tokens);
 		}
 
 		free(input);

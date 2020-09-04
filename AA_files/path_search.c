@@ -42,7 +42,8 @@ void search_for_command (char* command, tokenlist* tokens)
 		if(parsedPATH[i] != NULL)
 		{
 			int size_0 = strlen(parsedPATH[i]) + strlen(command) + 1;
-			char temp_command[size_0];
+			//char temp_command[size_0];		//needs to be dynamically allocated
+			char * temp_command = (char*)malloc(size_0);
 			strcpy(temp_command, parsedPATH[i]);
 			strcat(temp_command, "/");
 			strcat(temp_command, command);
@@ -66,17 +67,22 @@ void search_for_command (char* command, tokenlist* tokens)
 
 void execute_command(char* cmdpath, tokenlist* tokens)
 {
+	//free(tokens->items[0]);	//only if search_for_command is called first
+	tokens->items[0] = cmdpath;
+
+	for (int i = 0; i < tokens->size + 1; i++)
+		printf("token %d: (%s)\n", i, tokens->items[i]);
+
 	pid_t pid = fork();
 	if (pid == 0)		//for some reason, this is getting called more then once occassionally
 	{
-		execv(cmdpath, tokens->items);
-		//fprintf(stderr, "child process couldn't execute command\n");
+		execv(tokens->items[0], tokens->items);		//replace [0] in tokens with the cmdpath
 	}
 	else
 	{
 		waitpid(pid, NULL, 0);
 		printf("Child exited\n");
-	}
+	} //need piping logic before and after the fork
 }
 
 // checks for exists of a command

@@ -14,7 +14,9 @@
  * descriptor as its 'input'.
  */
 
-static int piping(int input, int first, int last)
+//look at IO redirection slides ~ 10ish lines in execute_command
+
+int piping(int input, int first, int last)
 {
     int pipettes[2];
 
