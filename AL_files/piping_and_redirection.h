@@ -1,9 +1,15 @@
+
 //COP4610 Project 1 - Shell
 //file: piping_and_redirection.h
+// PIPING SCHEME: stdin -> 0 -> 0 -> 0 -> stdout 
+
+#ifndef PIPING_AND_REDIRECTION
+#define PIPING_AND_REDIRECTION
 
 static int piping_and_redirection(int, int, int);
 static char* args[512]; //Char array to store arguments
 
+#endif 
 
 /*
 
@@ -45,5 +51,3 @@ Piping should behave in the following manner
     ○ CMD1 redirects its standard output to CMD2's standard input
     ○ CMD2 redirects its standard output to CMD3's standard input
 */
-
-// PIPING SCHEME: stdin -> 0 -> 0 -> 0 -> stdout 
