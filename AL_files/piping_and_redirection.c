@@ -24,8 +24,9 @@
  */
 
 
-static int piping(int input, int first, int last)
+int piping(int input, int first, int last)
 {
+    int READ = 0, WRITE = 1;
     int pipettes[2];
     pid_t pid;
     pipe(pipettes); //Invoke pipe

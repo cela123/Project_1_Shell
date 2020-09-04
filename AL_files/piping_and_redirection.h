@@ -6,8 +6,8 @@
 #ifndef PIPING_AND_REDIRECTION
 #define PIPING_AND_REDIRECTION
 
-static int piping_and_redirection(int, int, int);
 static char* args[512]; //Char array to store arguments
+int piping(int, int, int);
 
 #endif 
 
