@@ -6,32 +6,44 @@
  
 #include <sys/types.h>
 #include <sys/wait.h>
+#include "piping_and_redirection.h"
 
-/* PIPING SCHEME
-    stdin -> 0 -> 0 -> 0 -> stdout 
-*/
+/*
+ * Handle commands separately
+ * input: return value from previous command (useful for pipe file descriptor)
+ * first: 1 if first command in pipe-sequence (no input from previous pipe)
+ * last: 1 if last command in pipe-sequence (no input from previous pipe)
+ *
+ * EXAMPLE: If you type "ls | grep shell | wc" in your shell:
+ *    fd1 = piping(0, 1, 0), with args[0] = "ls"
+ *    fd2 = piping(fd1, 0, 0), with args[0] = "grep" and args[1] = "shell"
+ *    fd3 = piping(fd2, 0, 1), with args[0] = "wc"
+ *
+ * So if 'piping' returns a file descriptor, the next 'command' has this
+ * descriptor as its 'input'.
+ */
+
 
 static int piping(int input, int first, int last)
 {
     int pipettes[2];
-
+    pid_t pid;
     pipe(pipettes); //Invoke pipe
     pid = fork();
 
     if (pid == 0)
     {
-        if (first == 1 && last == 0 && input == 0) //CMD1
+        if (first == 1 && last == 0 && input == 0)          //CMD1
         { 
             dup2(pipettes[WRITE], STDOUT_FILENO);
         }
-        else if (first == 0 && last == 0 && input != 0) //CMD2
+        else if (first == 0 && last == 0 && input != 0)     //CMD2
         { 
             dup2(input, STDIN_FILENO);
             dup2(pipettes[WRITE], STDOUT_FILENO);
         }
-        else //CMD3
+        else                                                //CMD3
         { 
-            
             dup2(input, STDIN_FILENO);//last command
         }
 
