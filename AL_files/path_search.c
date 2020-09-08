@@ -55,7 +55,7 @@ void search_for_command(char *command, tokenlist *tokens)
             if (does_command_exist(temp_command))
             {
                 printf("Running Command\n"); //insert command execution here
-                execute_command(temp_command, tokens);
+                execute_command(temp_command, tokens, 1);
                 printf("After running command\n");
 
                 break;
@@ -70,10 +70,13 @@ void search_for_command(char *command, tokenlist *tokens)
 }
 
 
-void execute_command(char *cmdpath, tokenlist *tokens)
+void execute_command(char *cmdpath, tokenlist *tokens, int check_call_location)
 {
     int mypipefd[2], ret, input_fd, output_fd;
-    //free(tokens->items[0]);	//only if search_for_command is called first
+
+    if (check_call_location == 1)
+        free(tokens->items[0]);	//only if search_for_command is called first
+
     tokens->items[0] = cmdpath;
 
     for (int i = 0; i < tokens->size + 1; i++)

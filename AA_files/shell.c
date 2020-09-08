@@ -18,7 +18,8 @@ int main()
 		for (int i = 0; i < tokens->size; i++) 
 		{
 			//printf("token %d: (%s)\n", i, tokens->items[i]);
-			char tempStr[strlen(tokens->items[i])];		//dynamically allocated instead!!!!!!!!!!
+			//char tempStr[strlen(tokens->items[i])];		//dynamically allocated instead!!!!!!!!!!
+			char * tempStr = (char*)malloc(strlen(tokens->items[i]))
       		if(*(tokens->items[i]) == '$')		//little hack for 2/4 : eos defined by null and the variable (token[i]) defines start of string 
 			{
 				strcpy(tempStr, tokens->items[i]);
@@ -47,7 +48,7 @@ int main()
 			printf("executing built-in jobs\n"); 
 		}
 		else{	//first token is command, and tokens after pipe
-			search_for_command(tokens->items[0], tokens);
+			search_for_command(tokens->items[0], tokens, 0);
 		}
 
 		free(input);
