@@ -25,13 +25,28 @@ int main()
 		//CHECKING USER INPUT FOR COMMANDS, ENV VARIABLES, ETC
 		for (int i = 0; i < tokens->size; i++) 
 		{
-			char tempStr[strlen(tokens->items[i])];
+			
+			char * tempStr = (char*)malloc(strlen(tokens->items[i]));
 			//dereference env vars (part2)
       		if(*(tokens->items[i]) == '$')
 			{
-				strcpy(tempStr, tokens->items[i]);
-				memmove(tempStr, tempStr+1, strlen(tempStr));
-	        	printf("%s dereferenced: %s\n", tempStr, getenv(tempStr));
+				printf("token %d: (%s)\n", i, tokens->items[i]);
+
+				//tempStr stores the address of first char after $
+				tempStr = &(tokens->items[i][1]);
+
+				if(getenv(tempStr)==NULL)	//if env var dne, print empty string
+					printf(""); 
+				else{		
+					//replacing the data at the address with derefrenced string
+					*tempStr = (char *)(getenv(tempStr)); 	
+				}
+				printf("%s dereferenced: %s\n", tempStr, getenv(tempStr));
+				printf("token %d: (%s)\n", i, tokens->items[i]);
+
+
+				
+
   			}
 			
 			else if(*(tokens->items[i]) == '~')
@@ -40,31 +55,33 @@ int main()
 				memmove(tempStr, tempStr+1, strlen(tempStr));
 				printf("%s%s\n", getenv("HOME"), tempStr);
 			}
+	 
+		}
 			//checking if input is a built-in command and executing if it is
-			else if(strcmp(tokens->items[i], "exit")==0){
-				printf("executing built-in exit\n"); 
-			}
-			else if(strcmp(tokens->items[i], "cd")==0){
-				printf("executing built-in cd\n"); 
-			}	
-			else if(strcmp(tokens->items[i], "echo")==0){
-				printf("executing built-in echo\n"); 
-			}		
-			else if(strcmp(tokens->items[i], "jobs")==0){
-				printf("executing built-in jobs\n"); 
-			}
-			//checks for '/' in user input and executes given input
-			else if(has_slash(tokens->items[i]) == 1){
-				printf("user input has slashes\n");
-				execute_command(tokens->items[i], tokens); 
-			} 
-			else{
-				search_for_command(tokens->items[i], tokens); 
-			}	
+		if(strcmp(tokens->items[0], "exit")==0){
+			printf("executing built-in exit\n"); 
+		}
+		else if(strcmp(tokens->items[0], "cd")==0){
+			printf("executing built-in cd\n"); 
+		}	
+		else if(strcmp(tokens->items[0], "echo")==0){
+			printf("executing built-in echo\n"); 
+		}		
+		else if(strcmp(tokens->items[0], "jobs")==0){
+			printf("executing built-in jobs\n"); 
+		}
+		//checks for '/' in user input and executes given input
+		else if(has_slash(tokens->items[0]) == 1){
+			printf("user input has slashes\n");
+			//execute_command(tokens->items[i], tokens); 
+		} 
+		else{
+			search_for_command(tokens->items[0], tokens); 
+		}	
 
 			
-		}
-
+		
+		
 		free(input);
 		free_tokens(tokens);
 
