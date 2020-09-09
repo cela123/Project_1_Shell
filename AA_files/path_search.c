@@ -69,11 +69,12 @@ void search_for_command (char* command, tokenlist* tokens)
 
 void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation)
 {
+	printf("entering execute_command()\n"); 
 	int isOutput = 0;
 	int isInput = 0;
 	int isBoth = 0;
 	int fd_in = 0; 
-	int fd_out = 0;
+	int fd_out = -1;
 	int store_out_index = -1;
 	int store_in_index = -1;
 	int lowest_index = 0;
@@ -94,10 +95,13 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation)
 		printf("token %d: (%s)\n", i, tokens->items[i]);
 		if(strcmp(tokens->items[i], ">") == 0)
 		{
+			printf("found output redir '>'\n"); 
 			isOutput = 1;
-			store_out_index = i;
-			outfile = tokens->items[i+1];
-			if(fd_out = open(outfile, O_WRONLY | O_CREAT, 0644) < 0) 
+			store_out_index = i;			//location of > if it exists
+			outfile = tokens->items[i+1];	//outfile will be token after >
+
+			fd_out = open(outfile, O_WRONLY | O_CREAT, 0644); 
+			if(fd_out < 0) 		//
 			{
 				perror("Output file could not be opened");
 				return;
@@ -105,21 +109,30 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation)
 		}
 		if(*(tokens->items[i]) == '<')
 		{
+			printf("found input redir '>'\n"); 
 			isInput = 1; 	
 			store_in_index = i;
 			strcpy(infile, tokens->items[i+1]);
 			printf("infile: %s\n", infile);
 			if(fd_in = open(infile, O_RDONLY) < 0)
 				perror("Input file could not be opened");
+				//AD:shouldn't there also be a return here?
 		}	
-	}
+	} 
 
-	if(store_in_index == -1 && store_out_index > 0)
+	printf("'>' is located at index %d\n", store_out_index); 
+	printf("'<' is located at index %d\n", store_in_index); 
+
+	if(store_in_index == -1 && store_out_index > 0){
+		printf("there is only output redirection\n\n"); 
 		for (int k = 0; k < store_out_index; k++)
 			add_token(temp, tokens->items[k]);
-	else if(store_in_index > 0 && store_out_index == -1)
+	}
+	else if(store_in_index > 0 && store_out_index == -1){
+		printf("there is only input redirection\n\n"); 
 		for (int k = 0; k < store_in_index; k++)
 			add_token(temp, tokens->items[k]);
+	}
 	else if(store_in_index > 0 && store_out_index > 0)
 	{
 		if(store_in_index > store_out_index)
@@ -131,7 +144,7 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation)
 			add_token(temp, tokens->items[k]);
 	}
 
-	for(int k = 0; k < temp->size-1; k++)
+	for(int k = 0; k < temp->size; k++)
 		printf("%d: %s\n", k, temp->items[k]);
 
 	//printf("isOutput: %d\nisInput: %d\nisBoth: %d\n", isOutput, isInput, isBoth);
@@ -147,13 +160,15 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation)
 		}
 		if(isOutput == 1)
 		{
+			printf("child is out\n"); 
+			printf("fd_out: %d\n", fd_out); 
 			close(STDOUT_FILENO);
 			dup(fd_out);
 			close(fd_out);
 			execv(temp->items[0], temp->items);
 		}
 		
-		//what if both?
+		//what if both? 					AD: is this necessary?
 		if(isInput == 0 && isOutput == 0)
 			execv(tokens->items[0], tokens->items);		//replace [0] in tokens with the cmdpath
 		
