@@ -34,34 +34,39 @@ int main()
 			for (int i = 0; i < tokens->size; i++) 
 			{
 			
-				char * tempStr = (char*)malloc(strlen(tokens->items[i]));
+				//char * tempStr = (char*)malloc(strlen(tokens->items[i]));
 				//dereference env vars (part2)
       			if(*(tokens->items[i]) == '$')
 				{
+					char *var = getenv(&(tokens->items[i][1])); 
 					printf("token %d: (%s)\n", i, tokens->items[i]);
 
-					//tempStr stores the address of first char after $
-					tempStr = &(tokens->items[i][1]);
 
-					if(getenv(tempStr)==NULL)	//if env var dne, print empty string
-						printf(""); 
-					else{		
-						//replacing the data at the address with derefrenced string
-						*tempStr = (char *)(getenv(tempStr)); 							//CURRENTLY DOES NOT WORK
+					free(tokens->items[i]); 
+
+					if(var==NULL){	//if env var dne, replace token with empty string						
+						tokens->items[i] = ""; 
+
 					}
-					printf("%s dereferenced: %s\n", tempStr, getenv(tempStr));
+					else{		
+						//if env var does exist replace token with var						
+						tokens->items[i] = var; 							//CURRENTLY DOES NOT WORK
+					}
 					printf("token %d: (%s)\n", i, tokens->items[i]);			
 
-  					}
+  				}
 			
-					else if(*(tokens->items[i]) == '~')
-					{
-						strcpy(tempStr, tokens->items[i]);
-						memmove(tempStr, tempStr+1, strlen(tempStr));
-						printf("%s%s\n", getenv("HOME"), tempStr);
-					}
-	 
+				else if(*(tokens->items[i]) == '~')
+				{
+					char *home = getenv("HOME"); 
+					free(tokens->items[i]); 
+					tokens->items[i] =  home; 
+					//strcpy(tempStr, tokens->items[i]);
+					//memmove(tempStr, tempStr+1, strlen(tempStr));
+					//printf("%s%s\n", getenv("HOME"), tempStr);
 				}
+	 
+			}
 			//checking if input is a built-in command and executing if it is
 			if(strcmp(tokens->items[0], "exit")==0){
 				printf("executing built-in exit\n"); 
