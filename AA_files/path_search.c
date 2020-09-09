@@ -87,9 +87,6 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation)
 
 	tokens->items[0] = cmdpath;
 
-	//for (int i = 0; i < tokens->size + 1; i++)
-		//printf("1 - token %d: (%s)\n", i, tokens->items[i]);
-
 	for(int i = 0; i < tokens->size - 1; i++)
 	{
 		printf("token %d: (%s)\n", i, tokens->items[i]);
@@ -100,22 +97,24 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation)
 			store_out_index = i;			//location of > if it exists
 			outfile = tokens->items[i+1];	//outfile will be token after >
 
-			fd_out = open(outfile, O_WRONLY | O_CREAT, 0644); 
-			if(fd_out < 0) 		//
+			if((fd_out = open(outfile, O_WRONLY | O_CREAT, 0644)) < 0)
 			{
 				perror("Output file could not be opened");
 				return;
 			}
 		}
-		if(*(tokens->items[i]) == '<')
+		if(strcmp(tokens->items[i], "<") == 0)
 		{
-			printf("found input redir '>'\n"); 
+			printf("found input redir '<'\n"); 
 			isInput = 1; 	
 			store_in_index = i;
-			strcpy(infile, tokens->items[i+1]);
-			printf("infile: %s\n", infile);
-			if(fd_in = open(infile, O_RDONLY) < 0)
+			infile = tokens->items[i+1];
+			
+			if((fd_in = open(infile, O_RDONLY, 0644)) < 0)
+			{
 				perror("Input file could not be opened");
+				return;
+			}
 				//AD:shouldn't there also be a return here?
 		}	
 	} 
@@ -154,9 +153,11 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation)
 	if (pid == 0)		//for some reason, this is getting called more then once occassionally
 	{	
 		if(isInput == 1)
-		{		
+		{	
+			close(STDIN_FILENO);
 			dup(fd_in);
 			close(fd_in);
+			execv(temp->items[0], temp->items);
 		}
 		if(isOutput == 1)
 		{
