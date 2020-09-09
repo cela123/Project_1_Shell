@@ -7,7 +7,10 @@
 #include "parser.h"
 #include "path_search.h"
 
-void search_for_command (char* command, tokenlist* tokens)
+#include <sys/stat.h>
+#include <fcntl.h>
+
+void search_for_command (char* command, tokenlist* tokens, int hasIO)
 {
 	char * mainPATH = getenv("PATH");
 
@@ -50,7 +53,7 @@ void search_for_command (char* command, tokenlist* tokens)
 			if(does_command_exist(temp_command))
 			{
 				printf("Running Command\n");		//insert command execution here
-				execute_command(temp_command, tokens);
+				execute_command(temp_command, tokens, hasIO);
 				printf("After running command\n");
 				
 				break;		
@@ -64,11 +67,35 @@ void search_for_command (char* command, tokenlist* tokens)
 	free(parsedPATH);
 }
 
-void execute_command(char* cmdpath, tokenlist* tokens)
+void execute_command(char* cmdpath, tokenlist* tokens, int hasIO)
 {
+	int fd; 
+/* 	if(checkCallLocation == 1){
+		free(tokens->items[0]); 
+	} */
+
+/* 	if(hasIO == 1){
+		 char* filename
+		int ioSpot=0; 
+		while(tokens->items[ioSpot] != '<' || tokens->items[ioSpot] != '>'){
+			ioSpot++;  
+			
+		}
+
+		fd = open("output.txt", O_RDONLY); 
+	} */
+
 	pid_t pid = fork();
 	if (pid == 0)		//for some reason, this is getting called more then once occassionally
-	{
+	{	
+
+		if(hasIO == 1){
+			fd = open("output.txt", O_RDONLY);
+			close(stdin); 
+			dup(fd); 
+			close(fd); 
+		}
+
 		execv(cmdpath, tokens->items);
 		//fprintf(stderr, "child process couldn't execute command\n");
 	}
