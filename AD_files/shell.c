@@ -86,7 +86,7 @@ int main()
 				execute_command(tokens->items[0], tokens, hasIO); 
 			} 
 			else{
-				search_for_command(tokens->items[0], tokens, hasIO);
+				search_for_command(tokens->items[0], tokens);
 			}	
 
 			
