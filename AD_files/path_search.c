@@ -79,6 +79,8 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation)
 	int lowest_index = 0;
 	char * infile = NULL;
 	char * outfile = NULL;
+	int pipettes[2];
+	int hasPipe = 0; 
 	tokenlist * temp = new_tokenlist();
 
 	if(checkCallLocation == 1)
@@ -118,7 +120,15 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation)
 				perror("Input file could not be opened");
 				return;
 			}
-				//AD:shouldn't there also be a return here?
+		}
+
+		if(strcmp(tokens->items[i], "|") == 0){ 		//piping
+			printf("piping detected\n"); 
+			hasPipe = 1; 
+			pipe(pipettes); 
+			dup(pipettes[0]); 
+			dup(pipettes[1]); 
+
 		}	
 	} 
 
@@ -151,66 +161,63 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation)
 
 	//printf("isOutput: %d\nisInput: %d\nisBoth: %d\n", isOutput, isInput, isBoth);
 
-	pid_t pid = fork();
+	pid_t pid1 = fork();
 
-	if (pid == 0)		//for some reason, this is getting called more then once occassionally
+	if (pid1 == 0)		
 	{	
+		if(hasPipe == 1){
+			close(pipettes[0]); 
+			//redirect stdout to be input of pipe
+			close(STDOUT_FILENO);
+			dup(pipettes[1]); 
+			close(pipettes[1]); 
+		}
 		printf("\n\n"); 
-
-		if(isInput == 1 && isOutput == 0)
-		{	
-			close(STDIN_FILENO);
-			dup(fd_in);
-			close(fd_in);
-			execv(temp->items[0], temp->items);
-		}
-		if(isOutput == 1 && isInput == 0)
-		{
-			close(STDOUT_FILENO);
-			dup(fd_out);
-			close(fd_out);
-			execv(temp->items[0], temp->items);
-		}
-		if(isOutput == 1 && isInput == 1){
-			close(STDIN_FILENO);
-			dup(fd_in);
-			close(fd_in);
-			close(STDOUT_FILENO);
-			dup(fd_out);
-			close(fd_out);
-			execv(temp->items[0], temp->items);
-		}
-
-		
-		
-		if(isInput == 0 && isOutput == 0)
+		if(isInput == 0 && isOutput == 0){
 			execv(tokens->items[0], tokens->items);	
-
-
-
+		}
 			
-/* 		if(store_in_index > -1){
+		if(isInput == 1){
 			printf("changing input file descriptors\n"); 
 			close(STDIN_FILENO);
 			dup(fd_in);
 			close(fd_in); 
 		}
-		if(store_out_index > -1){
+		if(isOutput == 1){
 			printf("changing output file descriptors\n"); 
-			close(STDOUT_FILENO);
+			close(STDOUT_FILENO);				
 			dup(fd_out);
 			close(fd_out);
 		}
 		
-
-		execv(temp->items[0], temp->items); */
 		
-		
-		/* //what if neither				AD: is this necessary?
-		if(isInput == 0 && isOutput == 0)
-			execv(tokens->items[0], tokens->items);		//replace [0] in tokens with the cmdpath */
+		execv(temp->items[0], temp->items);
 		
 		exit(1);
+	}
+	//check for piping first{}
+	if(hasPipe == 1){
+		pid_t pid2 = fork(); 
+		if(pid2 == 0){
+			//redirect stdin to be output of pipe
+			close(pipettes[1]); 
+			close(STDIN_FILENO);
+			dup(pipettes[1]); 
+			close(pipettes[1]); 
+		}
+		else{
+			free_tokens(temp);
+
+			if(isOutput == 1)
+				close(fd_out);
+			if(isInput == 1)
+				close(fd_in);
+
+			waitpid(pid1, NULL, 0);
+			waitpid(pid2,NULL, 0 )
+			printf("\n\nChild exited\n");	
+			return; //this waits for both processes in the event of piping		
+		}
 	}
 	else
 	{
@@ -221,84 +228,11 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation)
 		if(isInput == 1)
 			close(fd_in);
 
-		waitpid(pid, NULL, 0);
+		waitpid(pid1, NULL, 0);
 		printf("\n\nChild exited\n");
 	}
 	
 }
-
-/*void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation)
-{
-	int isOutput = 0, isInput = 0;
-	int outPreference, inPreference, i;
-	char * inputFile, outputFile;
-
-	if(checkCallLocation == 1)
-		free(tokens->items[0]);	//free memory at this space so we can replace
-
-	int fd = open()
-
-	/*
-	pid_t backgroundProcesses[10];
-	int count = 0;
-	int isBackground = 0;
-
-	while(count < 10)
-	{
-		backgroundProcesses[count] = -1;
-		count++;
-	}
-
-	if(*(tokens->items[tokens->size-1]) == '&')
-	{
-		isBackground = 1;
-		tokens->items[tokens->size-1] = NULL;
-	}
-	
-
-	tokens->items[0] = cmdpath;
-
-	pid_t pid = fork();
-
-	if (pid == 0)		//for some reason, this is getting called more then once occassionally
-	{	
-		if(isOutput == 1)
-		{
-			close(stdout);
-			dup(fd);
-			close(fd);
-		}
-		if(isInput == 1)
-		{
-			close(stdin);
-			dup(fd);
-			close(fd);
-		}
-		execv(tokens->items[0], tokens->items);		//replace [0] in tokens with the cmdpath
-	}
-	/*else if(isBackground == 1)		
-	{
-		count = 0;
-		pid_t status = waitpid(pid, NULL, WNOHANG);
-		while(1)
-		{
-			if(backgroundProcesses[count] == -1)		//if we encounter an empty PID place PID here
-			{
-				backgroundProcesses[count] = status;
-				break;
-			}
-			count++;
-		}
-		//reset array slot to -1 if pid is done?
-		for (int i = 0; i < tokens->size + 1; i++)
-			printf("token %d: (%s)\n", i, tokens->items[i]);
-	}
-	else
-	{
-		waitpid(pid, NULL, 0);
-		printf("Child exited\n");
-	} //need piping logic before and after the fork
-}*/
 
 // checks for exists of a command
 int does_command_exist(char* path)
