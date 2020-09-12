@@ -4,6 +4,7 @@
 #include "parser.h"
 #include "path_search.h"
 #include "piping_and_redirection.h"
+#include "built_ins.h"
 
 int has_slash(char*); 
 int has_IO(char*);
@@ -49,7 +50,7 @@ int main()
 
 					}
 					else{		
-						//if env var does exist replace token with var						
+						//if env var does exist replace token with copy of var						
 						tokens->items[i] = var; 							//CURRENTLY DOES NOT WORK
 					}
 					printf("token %d: (%s)\n", i, tokens->items[i]);			
@@ -70,12 +71,14 @@ int main()
 			//checking if input is a built-in command and executing if it is
 			if(strcmp(tokens->items[0], "exit")==0){
 				printf("executing built-in exit\n"); 
+				echo(tokens); 
 			}
 			else if(strcmp(tokens->items[0], "cd")==0){
 			printf("executing built-in cd\n"); 
 			}	
 			else if(strcmp(tokens->items[0], "echo")==0){
-			printf("executing built-in echo\n"); 
+				printf("executing built-in echo\n"); 
+				echo(tokens); 
 			}		
 			else if(strcmp(tokens->items[0], "jobs")==0){
 			printf("executing built-in jobs\n"); 
