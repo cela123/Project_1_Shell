@@ -188,9 +188,6 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation, pi
 		}
 		//printf("i_count is now: %d\n", i_count);
 	}
-	
-
-	//<------------Background processing logic end ------------> 
 
 	pid_t pid = fork();
 
@@ -210,7 +207,7 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation, pi
 			close(fd_in);
 			execv(temp_io->items[0], temp_io->items);
 		}
-		if(isOutput == 1)
+		if(isOutput == 1 && isInput == 0)
 		{ 
 			close(STDOUT_FILENO);
 			dup(fd_out);
