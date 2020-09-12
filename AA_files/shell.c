@@ -6,8 +6,26 @@
 
 int main()
 {
+	pid_t bg_process[10];
+	char * bg_commands[10];
+
+	for(int i = 0; i < 10; i++)
+	{
+		bg_process[i] = -1;
+		bg_commands[i] = (char*)malloc(100);
+	}
+
 	while (1) 
 	{
+		int count = 0;
+		for(int i = 0; i < 10; i++)
+		{
+			if(bg_process[i] != -1)
+			{
+				printf("[%d] %d\n", ++count, bg_process[i]);
+			}
+		}
+		
 		//fix cases where getenv($ENVVAR) DNE to null / empty string
 		printf("%s@%s : %s > ", getenv("USER"), getenv("MACHINE"), getenv("PWD"));
 
@@ -47,7 +65,7 @@ int main()
 			printf("executing built-in jobs\n"); 
 		}
 		else{	//first token is command, and tokens after pipe
-			search_for_command(tokens->items[0], tokens);
+			search_for_command(tokens->items[0], tokens, bg_process, bg_commands);
 		}
 
 		free(input);
