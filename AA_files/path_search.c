@@ -152,24 +152,30 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation)
 
 	if (pid == 0)		//for some reason, this is getting called more then once occassionally
 	{	
-		if(isInput == 1)
+		if(isInput == 1 && isOutput == 0)
 		{	
 			close(STDIN_FILENO);
 			dup(fd_in);
 			close(fd_in);
 			execv(temp->items[0], temp->items);
 		}
-		if(isOutput == 1)
+		if(isOutput == 1 && isInput == 0)
 		{
-			printf("child is out\n"); 
-			printf("fd_out: %d\n", fd_out); 
 			close(STDOUT_FILENO);
 			dup(fd_out);
 			close(fd_out);
 			execv(temp->items[0], temp->items);
 		}
+		if(isOutput == 1 && isInput == 1){
+			close(STDIN_FILENO);
+			dup(fd_in);
+			close(fd_in);
+			close(STDOUT_FILENO);
+			dup(fd_out);
+			close(fd_out);
+			execv(temp->items[0], temp->items);
+		}	
 		
-		//what if both? 					AD: is this necessary?
 		if(isInput == 0 && isOutput == 0)
 			execv(tokens->items[0], tokens->items);		//replace [0] in tokens with the cmdpath
 		

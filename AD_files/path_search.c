@@ -157,20 +157,53 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation)
 	{	
 		printf("\n\n"); 
 
+		if(isInput == 1 && isOutput == 0)
+		{	
+			close(STDIN_FILENO);
+			dup(fd_in);
+			close(fd_in);
+			execv(temp->items[0], temp->items);
+		}
+		if(isOutput == 1 && isInput == 0)
+		{
+			close(STDOUT_FILENO);
+			dup(fd_out);
+			close(fd_out);
+			execv(temp->items[0], temp->items);
+		}
+		if(isOutput == 1 && isInput == 1){
+			close(STDIN_FILENO);
+			dup(fd_in);
+			close(fd_in);
+			close(STDOUT_FILENO);
+			dup(fd_out);
+			close(fd_out);
+			execv(temp->items[0], temp->items);
+		}
+
+		
+		
+		if(isInput == 0 && isOutput == 0)
+			execv(tokens->items[0], tokens->items);	
+
+
+
 			
-		if(isInput == 1){
+/* 		if(store_in_index > -1){
+			printf("changing input file descriptors\n"); 
 			close(STDIN_FILENO);
 			dup(fd_in);
 			close(fd_in); 
 		}
-		if(isOutput == 1){
+		if(store_out_index > -1){
+			printf("changing output file descriptors\n"); 
 			close(STDOUT_FILENO);
 			dup(fd_out);
 			close(fd_out);
 		}
 		
 
-		execv(temp->items[0], temp->items);
+		execv(temp->items[0], temp->items); */
 		
 		
 		/* //what if neither				AD: is this necessary?
