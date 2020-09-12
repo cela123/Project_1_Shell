@@ -12,6 +12,7 @@ int has_IO(char*);
 
 int main()
 {
+	int numCommands = 0; 
 	pid_t bg_process[10];
 	char * bg_commands[10];
 
@@ -101,6 +102,7 @@ int main()
 				if(strcmp(tokens->items[0], "exit")==0)
 				{
 					printf("executing built-in exit\n"); 
+					exit(numCommands); 
 				}
 				else if(strcmp(tokens->items[0], "cd")==0){
 					printf("executing built-in cd\n"); 

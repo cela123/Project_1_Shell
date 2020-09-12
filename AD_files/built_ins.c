@@ -6,6 +6,9 @@
 #include "built_ins.h"
 
 
+void exit(int numCommands){
+    waitpid(-1, NULL, 0);
+}
 
 void cd(char* path){
     if(chdir(path) == -1)
