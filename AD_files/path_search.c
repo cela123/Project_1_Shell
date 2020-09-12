@@ -202,8 +202,8 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation)
 			//redirect stdin to be output of pipe
 			close(pipettes[1]); 
 			close(STDIN_FILENO);
-			dup(pipettes[1]); 
-			close(pipettes[1]); 
+			dup(pipettes[0]); 
+			close(pipettes[0]); 
 		}
 		else{
 			free_tokens(temp);
@@ -214,7 +214,7 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation)
 				close(fd_in);
 
 			waitpid(pid1, NULL, 0);
-			waitpid(pid2,NULL, 0 )
+			waitpid(pid2,NULL, 0 );
 			printf("\n\nChild exited\n");	
 			return; //this waits for both processes in the event of piping		
 		}
