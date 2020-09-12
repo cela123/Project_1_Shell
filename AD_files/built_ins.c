@@ -1,11 +1,21 @@
-
+#include <sys/wait.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
 #include "parser.h"
 #include "built_ins.h"
 
-#include <sys/wait.h>
-#include <stdio.h>
 
 
+void cd(char* path){
+    if(chdir(path) == -1)
+        printf("error: invalid directory\n");
+    else{
+        char* cwd = getcwd(NULL, 0); 
+        setenv("PWD", cwd, 1); 
+        free(cwd); 
+    }
+}
 
 
 
