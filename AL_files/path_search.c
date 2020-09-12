@@ -9,6 +9,7 @@
 #include "parser.h"
 #include "path_search.h"
 
+
 void search_for_command (char* command, tokenlist* tokens)
 {
 	char * mainPATH = getenv("PATH");
@@ -84,10 +85,12 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation)
 	char * infile = NULL;
 	char * outfile = NULL;
 	tokenlist * temp = new_tokenlist();
-	int pipettes[2];
 	pid_t pid, cpid;
+	int pipettes[2];
+	char *argv[5];
 	
 	if(checkCallLocation == 1)
+
 		free(tokens->items[0]);	//free memory at this space so we can replace
 
 	tokens->items[0] = cmdpath;
@@ -124,7 +127,7 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation)
 				perror("Input file could not be opened");
 				return;
 			}
-				//AD:shouldn't there also be a return here?	
+				//AD:shouldn't there also be a return here?
 		}
 		if(strcmp(tokens->items[i], "|") == 0)
 		{
@@ -161,11 +164,19 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation)
 		printf("%d: %s\n", k, temp->items[k]);
 
 	//printf("isOutput: %d\nisInput: %d\nisBoth: %d\n", isOutput, isInput, isBoth);
-
+	
+	//create the first child and run the first command
 	pid = fork();
 	
+	if (pid < 0) {
+	  perror("Initial call to fork() failed.\n");
+	  exit(1);
+	}
+
 	if (pid == 0)		//for some reason, this is getting called more then once occassionally
 	{	
+	  
+	 
 		printf("\n\n"); 
 
 			
@@ -179,13 +190,28 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation)
 			dup(fd_out);
 			close(fd_out);
 		}
+	      
 		if(isPipe)
-		{
-			cpid = fork();
-
-		}
+	      
+		 {
+		  // Set the process's output to the input
+		  close(1);
+		  dup(pipettes[1]);
+		  close(pipettes[0]);
+		  close(pipettes[1]);
+		  argv[0] = (char*) malloc(5*sizeof(char));
+		  argv[1] = (char*) malloc(5*sizeof(char));
+		  strcpy(argv[0],"ls");
+		  strcpy(argv[1],"-l");
+		  argv[2] = NULL;
+		  fprintf(stderr, "*** PIPE TEST, running ls -l  ***\n"); 
+		  execvp(argv[0], argv);
+		  perror("First execvp() failed");
+		  exit(1);
+			}
 		
-
+		
+		  
 		execv(temp->items[0], temp->items);
 		
 		
@@ -203,6 +229,44 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation)
 			close(fd_out);
 		if(isInput == 1)
 			close(fd_in);
+		if(isPipe)
+{
+	cpid = fork();
+		
+		if(cpid < 0)
+	        {
+		  perror("Second fork() failed!");
+		  exit(1);
+		}
+	       
+		if(cpid == 0) 
+		{
+		  // Set the process input to the output of the pipe
+		  close(0);
+		  dup(pipettes[0]);
+		  close(pipettes[0]);
+		  close(pipettes[1]);
+		  argv[0] = (char*) malloc(5*sizeof(char));
+		  argv[1] = (char*) malloc(5*sizeof(char));
+		  strcpy(argv[0], "grep");
+		  strcpy(argv[1], "pipe");
+		  argv[2] = NULL;
+		  fprintf(stderr, "*** PIPE TEST, running grep pipe ***\n");
+		  execvp(argv[0],argv);
+		  perror("Second execvp() failed");
+		  exit(1);
+		}
+		
+		close(pipettes[0]);
+		close(pipettes[1]);
+		// Wait for the children to finish, then exit
+		waitpid(pid, NULL, 0);
+		waitpid(cpid, NULL, 0);
+		fprintf(stderr, "*** Running grep pipe ***\n");
+		execvp(argv[0],argv);
+		printf("*** Father exiting... ***\n");
+		exit(1);
+}
 
 		waitpid(pid, NULL, 0);
 		printf("\n\nChild exited\n");

@@ -203,7 +203,7 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation, pi
 
 	if (pid == 0)		//for some reason, this is getting called more then once occassionally
 	{	
-		if(isInput == 1)
+		if(isInput == 1 && isOutput == 0)
 		{	
 			close(STDIN_FILENO);
 			dup(fd_in);
