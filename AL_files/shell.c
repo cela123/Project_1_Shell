@@ -3,12 +3,10 @@
 #include <string.h>
 #include "parser.h"
 #include "path_search.h"
-//#include "piping_and_redirection.h"
 
 int has_slash(char*); 
 int has_IO(char*);
 int has_pipe(char*);
-int num_pipes = 0;
 
 int main()
 {
@@ -88,27 +86,18 @@ int main()
 				printf("user input has slashes\n");
 				execute_command(tokens->items[0], tokens, hasIO); 
 			} 
-			else if (num_pipes > 0){
-				printf("User input has %d pipe(s)\n", num_pipes);
-				execute_command(tokens->items[0], tokens, num_pipes);
-			}
 
 			else{
 				search_for_command(tokens->items[0], tokens);
 			}	
 
-			
 		
 		
 		free(input);
 		free_tokens(tokens);
 
 		}
-
-
-
 	}
-
 	return 0;
 }
 
@@ -140,11 +129,9 @@ int has_pipe(char* input)
 {
 	int ret = 0; 
 	for(int i=0; i< strlen(input); i++){
-		if(input[i] == '|') {
+		if(input[i] == '|') 
 			ret = 1;
-			num_pipes++;
-		} 
+
 	}
-	printf("Number of pipes detected: %d \n", num_pipes);
 	return ret; 
 }
