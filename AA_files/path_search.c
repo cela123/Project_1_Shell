@@ -197,7 +197,7 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation, pi
 	if(isBackground == 1)
 	{
 		bg_process[i_count] = pid;
-		pid_t status = waitpid(pid, NULL, WNOHANG);
+		//pid_t status = waitpid(pid, NULL, WNOHANG);
 		//printf("bg_process[%d] is %d\n", i_count, pid);
 	}
 
@@ -224,7 +224,8 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation, pi
 		else if(isBackground == 1 && isBoth == 0)
 		{
 			execv(temp_bg->items[0], temp_bg->items);
-		}	
+		}
+		execv(tokens->items[0], tokens->items);
 		exit(1);
 	}
 	else
