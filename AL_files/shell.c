@@ -3,7 +3,6 @@
 #include <string.h>
 #include "parser.h"
 #include "path_search.h"
-//#include "piping_and_redirection.h"
 
 int has_slash(char*); 
 int has_IO(char*);
@@ -86,11 +85,6 @@ int main()
 			else if(has_slash(tokens->items[0]) == 1){
 				printf("user input has slashes\n");
 				execute_command(tokens->items[0], tokens, hasIO); 
-			} 
-			else if(has_pipe(tokens->items[0]) == 1){
-				printf("user input has pipe\n");
-				execute_command(tokens->items[0], tokens, hasPipe);
-				//execute_piped_command(tokens->items[0], tokens); 
 			} 
 
 
