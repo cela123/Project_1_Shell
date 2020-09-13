@@ -8,6 +8,10 @@
 #include "parser.h"
 #include "path_search.h"
 
+int hasPipe = 0;
+int pipe_count = 0;
+tokenlist** parsedPipes;
+
 void search_for_command(char *command, tokenlist *tokens)
 {
 	char *mainPATH = getenv("PATH");
@@ -18,6 +22,7 @@ void search_for_command(char *command, tokenlist *tokens)
 	char **parsedPATH = NULL;
 	char *tok = strtok(copyPATH, ":");
 	int size = 0;
+	tokenlist** tok_list;
 
 	//allocates space in array for each individual path
 	while (tok)
@@ -56,11 +61,19 @@ void search_for_command(char *command, tokenlist *tokens)
 
 				break;
 			}
+			else if(hasPipe)
+			{
+				tok_list = partitionPipes((tokenlist*)temp_command);
+				printf("tokens: %s\n", tok_list[0]);
+			execute_command(temp_command, tok_list[0], 1);
+			break;
+			}
 		}
 	}
 
-	if (size == i)
+	if (size == i && !hasPipe)
 		printf("command not found\n");
+
 
 	free(parsedPATH);
 }
@@ -74,11 +87,12 @@ void execute_command(char *cmdpath, tokenlist *tokens, int checkCallLocation)
 	int fd_out = -1;
 	int store_out_index = -1;
 	int store_in_index = -1;
+	int store_pipe_index = -1;
 	int lowest_index = 0;
 	char *infile = NULL;
 	char *outfile = NULL;
 	int pipettes[2];
-	int hasPipe = 0;
+	
 	tokenlist *temp = new_tokenlist();
 
 	if (checkCallLocation == 1)
@@ -121,16 +135,24 @@ void execute_command(char *cmdpath, tokenlist *tokens, int checkCallLocation)
 
 		if (strcmp(tokens->items[i], "|") == 0)
 		{ //piping
-			printf("piping detected\n");
+			
 			hasPipe = 1;
+			pipe_count++;
+			printf("\tfound pipe '|' (in path_search.c)\t # of pipes = %d \n", pipe_count);
+			store_pipe_index = i;
+		
 			pipe(pipettes);
 			dup(pipettes[0]);
 			dup(pipettes[1]);
 		}
 	}
 
-	printf("'>' is located at index %d\n", store_out_index);
-	printf("'<' is located at index %d\n", store_in_index);
+	if(store_out_index)
+		printf("\t'>' is located at index %d\n", store_out_index);
+	if(store_in_index)
+		printf("\t'<' is located at index %d\n", store_in_index);
+	if(hasPipe)
+		printf("\t'|' is located at index %d\n", store_pipe_index);
 
 	if (store_in_index == -1 && store_out_index > 0)
 	{
@@ -152,9 +174,19 @@ void execute_command(char *cmdpath, tokenlist *tokens, int checkCallLocation)
 			lowest_index = store_in_index;
 
 		for (int k = 0; k < lowest_index; k++)
-			add_token(temp, tokens->items[k]);
-	}
+				add_token(temp, tokens->items[k]);
 
+			
+	}
+	else if (hasPipe)
+	{
+		for (int k = 0; k < tokens->size; k++)
+		{
+			if (tokens->items[k] != "|")
+				add_token(temp, tokens->items[k]);
+		}
+	}
+	
 	for (int k = 0; k < temp->size; k++)
 		printf("%d: %s\n", k, temp->items[k]);
 
@@ -166,6 +198,7 @@ void execute_command(char *cmdpath, tokenlist *tokens, int checkCallLocation)
 	{
 		if (hasPipe == 1)
 		{
+			printf("\thasPipe, running pid1\n");
 			close(pipettes[0]);
 			//redirect stdout to be input of pipe
 			close(STDOUT_FILENO);
@@ -204,6 +237,7 @@ void execute_command(char *cmdpath, tokenlist *tokens, int checkCallLocation)
 		pid_t pid2 = fork();
 		if (pid2 == 0)
 		{
+			printf("\thasPipe, running pid2\n");
 			//redirect stdin to be output of pipe
 			close(pipettes[1]);
 			close(STDIN_FILENO);
@@ -238,7 +272,6 @@ void execute_command(char *cmdpath, tokenlist *tokens, int checkCallLocation)
 		printf("\n\nChild exited\n");
 	}
 }
-
 
 // checks for exists of a command
 int does_command_exist(char *path)
