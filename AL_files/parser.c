@@ -13,6 +13,23 @@ tokenlist *new_tokenlist(void)
 	return tokens;
 }
 
+char** parsePipe(char* str, char** strpiped) 
+{ 
+    int i; 
+    for (i = 0; i < 2; i++) { 
+        strpiped[i] = strsep(&str, "|"); 
+        if (strpiped[i] == NULL) 
+            break; 
+    } 
+  
+    if (strpiped[1] == NULL) 
+        return; // returns zero if no pipe is found. 
+    else {
+        return strpiped; 
+    } 
+} 
+
+
 void add_token(tokenlist *tokens, char *item)
 {
 	int i = tokens->size;
