@@ -1,8 +1,8 @@
 shell: parser.o shell.o path_search.o
-	gcc -o shell.x -std=c99 parser.o shell.o path_search.o
+	gcc -o shell.x -std=c99 parser.o shell.o path_search.o piping.o
 
 debug: parser.o shell.o path_search.o
-	gcc -o shell.x -std=c99 parser.o shell.o path_search.o -g
+	gcc -o shell.x -std=c99 parser.o shell.o path_search.o piping.o -g
 
 path_search.o: path_search.c path_search.h
 	gcc -c -std=c99 path_search.c
@@ -13,5 +13,8 @@ parser.o: parser.c parser.h
 shell.o: shell.c
 	gcc -c -std=c99 shell.c
 
+piping.o: piping.c
+	gcc -c -std=c99 piping.c
 clean:
 	rm *.o shell.x
+

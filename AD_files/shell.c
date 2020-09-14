@@ -3,13 +3,16 @@
 #include <string.h>
 #include "sys/types.h"
 #include "parser.h"
+#include "built_ins.h"
 #include "path_search.h"
+
 
 int has_slash(char*); 
 int has_IO(char*);
 
 int main()
 {
+	int numCommands = 0; 
 	pid_t bg_process[10];
 	char * bg_commands[10];
 
@@ -78,37 +81,43 @@ int main()
 					printf("home: %s\n", home);
 					printf("tokens->items[%d]: %s\n", i, tokens->items[i]);
 				}
-				printf("inside for loop\n");
+				
 	 
-			} printf("outside for loop\n");
+			}
 			//checking if input is a built-in command and executing if it is
 
-			
-			if(strcmp(tokens->items[0], "exit")==0)
-			{
-				printf("executing built-in exit\n"); 
-			}
-			else if(strcmp(tokens->items[0], "cd")==0){
-				printf("executing built-in cd\n"); 
-			}	
-			else if(strcmp(tokens->items[0], "echo")==0){
-				printf("executing built-in echo\n"); 
-			}		
-			else if(strcmp(tokens->items[0], "jobs")==0){
-				printf("executing built-in jobs\n"); 
-			}
+			/* if(isEnv == 0)
+			{ */
+				if(strcmp(tokens->items[0], "exit")==0)
+				{
+					printf("executing built-in exit\n"); 
+					exit(numCommands); 
+				}
+				else if(strcmp(tokens->items[0], "cd")==0){
+					printf("executing built-in cd\n"); 
+					if(tokens->items[2] != NULL)	//case for too many arguments
+						printf("error: too many arguments\n"); 
+					else
+						cd(tokens->items[1]); 
+				}	
+				else if(strcmp(tokens->items[0], "echo")==0){
+					printf("executing built-in echo\n"); 
+					echo(tokens); 
+				}		
+				else if(strcmp(tokens->items[0], "jobs")==0){
+					printf("executing built-in jobs\n"); 
+				}
 			//checks for '/' in user input and executes given input
-			else if(has_slash(tokens->items[0]) == 1){
-				printf("user input has slashes\n");
-				execute_command(tokens->items[0], tokens, 0); 
-			}
-			else{
-				search_for_command(tokens->items[0], tokens);
-			}	
-		
+				else if(has_slash(tokens->items[0]) == 1){
+					printf("user input has slashes\n");
+					execute_command(tokens->items[0], tokens, 0); 
+				}
+				else{
+					search_for_command(tokens->items[0], tokens);
+				}	
+			/* } */
 			
 
-			printf("before free mem\n");
 		
 		
 		free(input);
