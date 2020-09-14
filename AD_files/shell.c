@@ -106,7 +106,7 @@ int main()
 				}
 				else if(strcmp(tokens->items[0], "cd")==0){
 					printf("executing built-in cd\n"); 
-					if(tokens->items[2] != NULL)
+					if(tokens->items[2] != NULL)	//case for too many arguments
 						printf("error: too many arguments\n"); 
 					else
 						cd(tokens->items[1]); 

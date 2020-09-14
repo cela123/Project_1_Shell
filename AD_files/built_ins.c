@@ -11,7 +11,14 @@ void exit(int numCommands){
 }
 
 void cd(char* path){
-    if(chdir(path) == -1)
+
+    if(path == NULL){ //if no arg is given for cd
+        chdir(getenv("HOME")); 
+        char* cwd = getcwd(NULL, 0); 
+        setenv("PWD", cwd, 1); 
+        free(cwd); 
+    }
+    else if(chdir(path) == -1)
         printf("error: invalid directory\n");
     else{
         char* cwd = getcwd(NULL, 0); 
