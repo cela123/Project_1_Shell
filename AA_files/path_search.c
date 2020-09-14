@@ -48,7 +48,7 @@ void search_for_command (char* command, tokenlist* tokens, pid_t* bg_process, ch
 			//printf("temp_command at %d: %s\n", i, temp_command);
 			if(does_command_exist(temp_command))
 			{
-				//printf("Running Command\n");		//insert command execution here
+				printf("Running Command: %s\n", command);		//insert command execution here
 				execute_command(temp_command, tokens, 1, bg_process, bg_commands);
 				//printf("After running command\n");
 				
@@ -69,7 +69,7 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation, pi
 {
 	//printf("entering execute_command()\n");
 	int isOutput = 0;
-	int isBackground = -1;
+	int isBackground = 0;
 	int isBackgroundFound = 0;
 	int isInput = 0;
 	int isBoth = 0;
@@ -97,7 +97,7 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation, pi
 		printf("token %d: (%s)\n", i, tokens->items[i]);
 		if(strcmp(tokens->items[i], ">") == 0)
 		{
-			//printf("found output redir '>'\n"); 
+			printf("found output redir '>'\n"); 
 			isOutput = 1;
 			store_out_index = i;			//location of > if it exists
 			outfile = tokens->items[i+1];	//outfile will be token after >
@@ -110,7 +110,7 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation, pi
 		}
 		if(strcmp(tokens->items[i], "<") == 0)
 		{
-			//printf("found input redir '<'\n"); 
+			printf("found input redir '<'\n"); 
 			isInput = 1; 	
 			store_in_index = i;
 			infile = tokens->items[i+1];
@@ -125,19 +125,19 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation, pi
 
 	if(store_in_index == -1 && store_out_index > 0)
 	{
-		//printf("there is only output redirection\n\n"); 
+		printf("there is only output redirection\n\n"); 
 		for (int k = 0; k < store_out_index; k++)
 			add_token(temp_io, tokens->items[k]);
 	}
 	else if(store_in_index > 0 && store_out_index == -1)
 	{
-		//printf("there is only input redirection\n\n"); 
+		printf("there is only input redirection\n\n"); 
 		for (int k = 0; k < store_in_index; k++)
 			add_token(temp_io, tokens->items[k]);
 	}
 	else if(store_in_index > 0 && store_out_index > 0)
 	{
-		//printf("there is both input and output redirection\n");
+		printf("there is both input and output redirection\n");
 		if(store_in_index > store_out_index)
 			lowest_index = store_out_index;
 		else
@@ -146,9 +146,7 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation, pi
 		for(int k = 0; k < lowest_index; k++)
 			add_token(temp_io, tokens->items[k]);
 	}
-	//<------------IO Processing Logic end ------------------->
 
-	//<------------Background processing logic ---------------> 
 	//determine if there is both input and output or not for background processing
 	if(isInput == 1 && isOutput == 1)
 		isBoth = 1;
@@ -160,11 +158,11 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation, pi
 	if(strcmp(tokens->items[tokens->size-1], "&") == 0)
 	{
 		isBackground = 1;
-		printf("& was found\n");
+		//printf("& was found\n");
 		k_count = 0;
 		for(i_count = 0; i_count < 10; i_count++)
 		{
-			printf("i_count is now: %d\n", i_count);
+			//printf("i_count is now: %d\n", i_count);
 			if(bg_process[i_count] == -1)		//make sure to reset when a pid is finished
 			{
 				while(tokens->items[k_count] != NULL)
@@ -184,9 +182,14 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation, pi
 		for(int i = 0; i < tokens->size-1; i++)
 		{
 			add_token(temp_bg, tokens->items[i]);
-			//printf("temp_bg_token(%d) - isBackgroundfound = %s\n", i, temp_bg->items[i]);
+			//printf("temp_bg_token(%d) = %s\n", i, temp_bg->items[i]);
 		}
 		//printf("i_count is now: %d\n", i_count);
+	}
+
+	for(int i = 0; i < 10; i++)
+	{
+		printf("bg_commands[%d] = %s", i, bg_commands[i]);
 	}
 
 	pid_t pid = fork();
@@ -200,34 +203,36 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation, pi
 
 	if (pid == 0)		//for some reason, this is getting called more then once occassionally
 	{	
-		if(isInput == 1 && isOutput == 0)
+		if(isInput == 1)
 		{	
 			close(STDIN_FILENO);
 			dup(fd_in);
 			close(fd_in);
 			execv(temp_io->items[0], temp_io->items);
 		}
-		if(isOutput == 1 && isInput == 0)
+		if(isOutput == 1)
 		{ 
 			close(STDOUT_FILENO);
 			dup(fd_out);
 			close(fd_out);
 			execv(temp_io->items[0], temp_io->items);
 		}
-		if(isBackground == 0 && isBoth == 0)
-		{
-			execv(tokens->items[0], tokens->items);		//replace [0] in tokens with the cmdpath
-		}
-		else if(isBackground == 1 && isBoth == 0)
+		if(isBackground == 1 && isBoth == 0)
 		{
 			execv(temp_bg->items[0], temp_bg->items);
 		}
-		execv(tokens->items[0], tokens->items);
+		else if(isBackground == 0 && isBoth == 0)
+		{
+			printf("in exec statement\n");
+			execv(tokens->items[0], tokens->items);		//replace [0] in tokens with the cmdpath
+		}
+		//execv(tokens->items[0], tokens->items);
 		exit(1);
 	}
 	else
 	{
 		free_tokens(temp_io);
+		free_tokens(temp_bg);
 
 		if(isOutput == 1)
 			close(fd_out);
@@ -235,9 +240,15 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation, pi
 			close(fd_in);
 		
 		if(isBackground == 0)
+		{
+			printf("NO WNOHANG FLAG\n");
 			waitpid(pid, NULL, 0);
-		/*else
-			waitpid(pid, NULL, WNOHANG);*/
+		}
+		else
+		{
+			
+		}
+			
 
 		printf("Child exited\n");
 	}
