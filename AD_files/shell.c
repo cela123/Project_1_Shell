@@ -54,7 +54,17 @@ int main()
 				//dereference env vars (part2)
       			if(*(tokens->items[i]) == '$')
 				{
-					char * var = (char*)malloc(strlen( &(tokens->items[i][1]) ));
+					char * temp = getenv(&(tokens->items[i][1]));
+					if (temp == NULL)
+						temp = "";
+
+					char * var = (char*)malloc(strlen( temp ) + 1);
+					strcpy(var, temp);
+
+					free(tokens->items[i]);	
+					
+					tokens->items[i] = var; 	
+/* 					char * var = (char*)malloc(strlen( &(tokens->items[i][1]) ));
 					var = getenv(&(tokens->items[i][1]));
 					//char *var = getenv(&(tokens->items[i][1])); 
 					printf("token %d: (%s)\n", i, tokens->items[i]);
@@ -69,7 +79,7 @@ int main()
 						//if env var does exist replace token with var						
 						tokens->items[i] = var; 							//CURRENTLY DOES NOT WORK
 					}
-					printf("token %d: (%s)\n", i, tokens->items[i]);			
+					printf("token %d: (%s)\n", i, tokens->items[i]);	 */		
 
   				}
 			
