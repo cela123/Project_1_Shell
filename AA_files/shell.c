@@ -103,16 +103,17 @@ int main()
 			}
 			else if(strcmp(tokens->items[0], "cd")==0){
 				printf("executing built-in cd\n");
-
-				//if(tokens->items[2] != NULL)	//case for too many arguments
-					//printf("error: too many arguments\n"); 
-				//else
-					//cd(tokens->items[1]);
+				if(tokens->items[2] != NULL)	//case for too many arguments
+					printf("error: too many arguments\n"); 
+				else{
+					
+					cd(tokens->items[1]); 
+				}
 				totalCommands++;
 			}	
 			else if(strcmp(tokens->items[0], "echo")==0){
 				printf("executing built-in echo\n");
-				//echo(tokens);
+				echo(tokens);
 				totalCommands++;
 			}		
 			else if(strcmp(tokens->items[0], "jobs")==0){

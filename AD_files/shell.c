@@ -85,30 +85,21 @@ int main()
 			
 				else if(tokens->items[i][0] == '~')
 				{
-					printf("~ detected\n"); 
-					char * temp = getenv("HOME");		//temp stores home path ex: /home/majors/delmar
-					if (temp == NULL)
-						temp = "";
+					char * temp = &(tokens->items[i][1]);
+					char * home = getenv("HOME");
 
-					char * var = (char*)malloc(strlen( temp ) + 1);
-					strcpy(var, temp);
+					int totalStrlen = strlen(home) + strlen(temp) + 1;
 
-					if(tokens->items[i][1] == '/'){
-						printf("~/ detected\n"); 
-						printf("length of token: %d\n", strlen(tokens->items[i]));
-						printf("length of dereferenced ~: %d\n", strlen(temp));  
-						int newSize = strlen(tokens->items[i]) + strlen(temp); 
-						printf("reallocating var to be %d...\n", newSize); 
-						var = (char*) realloc(var, newSize); 
-						printf("space for var reallocated to be: %d\n", strlen(var)); 			
-						for(int j=strlen(temp); j< strlen(tokens->items[i])-1; j++){
-							strcat(var, tokens->items[i][j]); 
-						}
-					}
+					char * var = (char*)malloc(totalStrlen);
+					strcpy(var, home);
+					strcat(var, temp);
 
-					free(tokens->items[i]);	
-					
-					tokens->items[i] = var; 
+					free(tokens->items[i]);
+					tokens->items[i] = var;
+
+					//printf("tokens->items[%d] is %s\n", i, tokens->items[i]);
+					if(strlen(temp) <= 0 && i <= 0)
+						printf("bash: %s: Is a directory\n", tokens->items[i]);
 				}
 				
 	 
