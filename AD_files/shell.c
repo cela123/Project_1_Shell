@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "sys/types.h"
 #include "parser.h"
 #include "path_search.h"
 
@@ -34,43 +35,36 @@ int main()
 
 		//collects everything entered by user into input
 		char *input = get_input();
-		int isEnv = 0;
 
 		//separates tokens (by spaces)
 		tokenlist *tokens = get_tokens(input);
 
 		//checks for IO for every input so it auto updates in calls to exec and search
 		int hasIO = has_IO(input); 
-
 		//Check in case there are no tokens
 		if(tokens->size == 0){}
 
 		else{
 	
 			for (int i = 0; i < tokens->size; i++) 
-			{
-			
-				//char * tempStr = (char*)malloc(strlen(tokens->items[i]));
+			{		
 				//dereference env vars (part2)
       			if(*(tokens->items[i]) == '$')
 				{
-					if (i == 0)
-						isEnv = 1;
-
-					char *var = getenv(&(tokens->items[i][1])); 
+					char * var = (char*)malloc(strlen( &(tokens->items[i][1]) ));
+					var = getenv(&(tokens->items[i][1]));
+					//char *var = getenv(&(tokens->items[i][1])); 
 					printf("token %d: (%s)\n", i, tokens->items[i]);
 					printf("var: %s\n", var);
 
-
-					free(tokens->items[i]); 
-
-					if(var==NULL){	//if env var dne, replace token with empty string						
+					if(var==NULL){	//if env var dne, replace token with empty string		
+						free(tokens->items[i]);				
 						tokens->items[i] = ""; 
 					}
 					else{		
-						strcpy(tokens->items[i], var);
+						//strcpy(tokens->items[i], var);
 						//if env var does exist replace token with var						
-						//tokens->items[i] = var; 							//CURRENTLY DOES NOT WORK
+						tokens->items[i] = var; 							//CURRENTLY DOES NOT WORK
 					}
 					printf("token %d: (%s)\n", i, tokens->items[i]);			
 
@@ -80,42 +74,38 @@ int main()
 				{
 					char *home = getenv("HOME"); 
 					free(tokens->items[i]);
-					strcpy(tokens->items[i], home);
+					tokens->items[i] = home; 
 					printf("home: %s\n", home);
-					//tokens->items[i] = home; 
-					//strcpy(tempStr, tokens->items[i]);
-					//memmove(tempStr, tempStr+1, strlen(tempStr));
-					//printf("%s%s\n", getenv("HOME"), tempStr);
+					printf("tokens->items[%d]: %s\n", i, tokens->items[i]);
 				}
 				printf("inside for loop\n");
 	 
 			} printf("outside for loop\n");
 			//checking if input is a built-in command and executing if it is
 
-			if(isEnv == 0)
+			
+			if(strcmp(tokens->items[0], "exit")==0)
 			{
-				if(strcmp(tokens->items[0], "exit")==0)
-				{
-					printf("executing built-in exit\n"); 
-				}
-				else if(strcmp(tokens->items[0], "cd")==0){
-					printf("executing built-in cd\n"); 
-				}	
-				else if(strcmp(tokens->items[0], "echo")==0){
-					printf("executing built-in echo\n"); 
-				}		
-				else if(strcmp(tokens->items[0], "jobs")==0){
-					printf("executing built-in jobs\n"); 
-				}
-			//checks for '/' in user input and executes given input
-				else if(has_slash(tokens->items[0]) == 1){
-					printf("user input has slashes\n");
-					execute_command(tokens->items[0], tokens, 0, bg_process, bg_commands); 
-				}
-				else{
-					search_for_command(tokens->items[0], tokens, bg_process, bg_commands);
-				}	
+				printf("executing built-in exit\n"); 
 			}
+			else if(strcmp(tokens->items[0], "cd")==0){
+				printf("executing built-in cd\n"); 
+			}	
+			else if(strcmp(tokens->items[0], "echo")==0){
+				printf("executing built-in echo\n"); 
+			}		
+			else if(strcmp(tokens->items[0], "jobs")==0){
+				printf("executing built-in jobs\n"); 
+			}
+			//checks for '/' in user input and executes given input
+			else if(has_slash(tokens->items[0]) == 1){
+				printf("user input has slashes\n");
+				execute_command(tokens->items[0], tokens, 0); 
+			}
+			else{
+				search_for_command(tokens->items[0], tokens);
+			}	
+		
 			
 
 			printf("before free mem\n");
