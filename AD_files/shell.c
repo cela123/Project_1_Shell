@@ -83,13 +83,32 @@ int main()
 
   				}
 			
-				else if(*(tokens->items[i]) == '~')
+				else if(tokens->items[i][0] == '~')
 				{
-					char *home = getenv("HOME"); 
-					free(tokens->items[i]);
-					tokens->items[i] = home; 
-					printf("home: %s\n", home);
-					printf("tokens->items[%d]: %s\n", i, tokens->items[i]);
+					printf("~ detected\n"); 
+					char * temp = getenv("HOME");		//temp stores home path ex: /home/majors/delmar
+					if (temp == NULL)
+						temp = "";
+
+					char * var = (char*)malloc(strlen( temp ) + 1);
+					strcpy(var, temp);
+
+					if(tokens->items[i][1] == '/'){
+						printf("~/ detected\n"); 
+						printf("length of token: %d\n", strlen(tokens->items[i]));
+						printf("length of dereferenced ~: %d\n", strlen(temp));  
+						int newSize = strlen(tokens->items[i]) + strlen(temp); 
+						printf("reallocating var to be %d...\n", newSize); 
+						var = (char*) realloc(var, newSize); 
+						printf("space for var reallocated to be: %d\n", strlen(var)); 			
+						for(int j=strlen(temp); j< strlen(tokens->items[i])-1; j++){
+							strcat(var, tokens->items[i][j]); 
+						}
+					}
+
+					free(tokens->items[i]);	
+					
+					tokens->items[i] = var; 
 				}
 				
 	 
@@ -107,8 +126,10 @@ int main()
 					printf("executing built-in cd\n"); 
 					if(tokens->items[2] != NULL)	//case for too many arguments
 						printf("error: too many arguments\n"); 
-					else
+					else{
+						
 						cd(tokens->items[1]); 
+					}
 				}	
 				else if(strcmp(tokens->items[0], "echo")==0){
 					printf("executing built-in echo\n"); 
@@ -128,6 +149,8 @@ int main()
 			/* } */
 			
 
+			for(int i =0; i<tokens->size; i++)
+				printf("token %d: %s\n", i, tokens->items[i]); 
 		
 		
 		free(input);
