@@ -3,8 +3,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
+#include <sys/wait.h>
+#include <fcntl.h>
 #include "parser.h"
 #include "path_search.h"
+#include "built_ins.h"
 
 int has_slash(char*); 
 
@@ -27,10 +30,10 @@ int main()
 			if(bg_process[i] != -1)
 			{
 				//printf("------ [%d] %d ------\n", ++count, bg_process[i]);
-				if(kill(bg_process[i], 0) == 0)
-					printf(" [%d] %d ------ is still running\n", ++count, bg_process[i]);
-				else
-					printf(" [%d]+ %d ------ finished\n", ++count, bg_process[i]);
+				if(waitpid(bg_process[i], NULL, WNOHANG) != 0)
+				{
+					printf(" [%d]+ %d ------ %d\n", ++count, bg_process[i], bg_commands[i]);
+				}
 			}
 		}
 		
@@ -49,32 +52,20 @@ int main()
 			{
       			if(*(tokens->items[i]) == '$')
 				{
-					if(i == 0)
-						firstTokenCheck = 1;
+					char * temp = getenv(&(tokens->items[i][1]));
+					if (temp == NULL)
+						temp = "";
 
-					char * var = (char*)malloc(strlen( &(tokens->items[i][1]) ));
-					var = getenv(&(tokens->items[i][1]));
-					//printf("token %d: (%s)\n", i, tokens->items[i]);
-					//printf("var: %s\n", var);
+					char * var = (char*)malloc(strlen( temp ) + 1);
+					strcpy(var, temp);
 
-					if(var==NULL){	//if env var dne, replace token with empty string
-						printf("if NULL -- (before free) token->items[%d] : (%s)\n", i, tokens->items[i]);		
-						free(tokens->items[i]);				
-						tokens->items[i] = ""; 
-					}
-					else{		
-						printf("else -- (before) token->items[%d] : (%s)\n", i, tokens->items[i]);
-						tokens->items[i] = var;
-						printf("else -- (after) token->items[%d] : (%s)\n", i, tokens->items[i]);
-					}
-					//printf("token %d: (%s)\n", i, tokens->items[i]);			
+					free(tokens->items[i]);	
+					
+					tokens->items[i] = var; 			
   				}
-				else if(*(tokens->items[i]) == '~')
-				{
-					if(i == 0)
-						firstTokenCheck = 1;
-
-					char *home = getenv("HOME"); 
+				if(*(tokens->items[i]) == '~')
+				{	//~/dir ---> expand and append rest of past
+					char *home = getenv("HOME");
 					free(tokens->items[i]);
 					tokens->items[i] = home; 
 					//printf("home: %s\n", home);
@@ -83,17 +74,21 @@ int main()
 				//printf("inside for loop\n");		
 			} //printf("outside for loop\n");
 
-			printf("tokens->items[0]: %s\n", tokens->items[0]);
-			printf("firstTokenCheck: %d\n", firstTokenCheck);
-
 			if(strcmp(tokens->items[0], "exit")==0){
-				printf("executing built-in exit\n"); 
+				printf("executing built-in exit\n");
+				//exit(count);
 			}
 			else if(strcmp(tokens->items[0], "cd")==0){
-				printf("executing built-in cd\n"); 
+				printf("executing built-in cd\n");
+
+				//if(tokens->items[2] != NULL)	//case for too many arguments
+					//printf("error: too many arguments\n"); 
+				//else
+					//cd(tokens->items[1]); 
 			}	
 			else if(strcmp(tokens->items[0], "echo")==0){
-				printf("executing built-in echo\n"); 
+				printf("executing built-in echo\n");
+				//echo(tokens); 
 			}		
 			else if(strcmp(tokens->items[0], "jobs")==0){
 				printf("executing built-in jobs\n"); 

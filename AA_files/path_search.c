@@ -187,6 +187,11 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation, pi
 		//printf("i_count is now: %d\n", i_count);
 	}
 
+	for(int i = 0; i < 10; i++)
+	{
+		printf("bg_commands[%d] = %s", i, bg_commands[i]);
+	}
+
 	pid_t pid = fork();
 
 	if(isBackground == 1)
@@ -241,8 +246,7 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation, pi
 		}
 		else
 		{
-			printf("WNOHANG FLAG\n");
-			waitpid(pid, NULL, WNOHANG);
+			
 		}
 			
 
