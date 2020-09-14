@@ -87,17 +87,23 @@ int main()
 				execute_command(tokens->items[0], tokens, hasIO); 
 			} 
 
+
 			else{
 				search_for_command(tokens->items[0], tokens);
 			}	
 
+			
 		
 		
 		free(input);
 		free_tokens(tokens);
 
 		}
+
+
+
 	}
+
 	return 0;
 }
 
@@ -129,9 +135,8 @@ int has_pipe(char* input)
 {
 	int ret = 0; 
 	for(int i=0; i< strlen(input); i++){
-		if(input[i] == '|') 
+		if(input[i] == '|')
 			ret = 1;
-
 	}
 	return ret; 
 }
