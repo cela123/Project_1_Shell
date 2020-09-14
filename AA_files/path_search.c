@@ -184,22 +184,10 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation, pi
 		//printf("i_count is now: %d\n", i_count);
 	}
 
-	
-
 	pid_t pid = fork();
 
 	if(isBackground == 1)
-	{
 		bg_process[i_count] = pid;
-		//pid_t status = waitpid(pid, NULL, WNOHANG);
-		//printf("bg_process[%d] is %d\n", i_count, pid);
-	}
-
-	/*for(int i = 0; bg_process[i] != -1; i++)
-	{
-		printf("bg_commands[%d] = %s\n bg_process[%d] = %d\n", i, bg_commands[i], i, bg_process[i]);
-	}*/
-
 
 	if (pid == 0)		//for some reason, this is getting called more then once occassionally
 	{	
@@ -225,7 +213,7 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation, pi
 		{
 			execv(tokens->items[0], tokens->items);		//replace [0] in tokens with the cmdpath
 		}
-		exit(1);
+		exit(1);		
 	}
 	else
 	{

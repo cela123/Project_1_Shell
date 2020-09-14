@@ -45,9 +45,6 @@ int main()
 		}
 
 		printf("totalCommands is: %d\n", totalCommands);
-
-		/*for(int i = 0; i < 10; i++)
-			printf("bg_process[%d] = %d\nbg_command[%d] = %s\n", i, bg_process[i], i, bg_commands[i]);*/
 		
 		//fix cases where getenv($ENVVAR) DNE to null / empty string
 		printf("%s@%s : %s> ", getenv("USER"), getenv("MACHINE"), getenv("PWD"));
@@ -55,7 +52,6 @@ int main()
 		char *input = get_input();
 		//printf("whole input: %s\n", input);
 		tokenlist *tokens = get_tokens(input);
-		int firstTokenCheck = 0;
 
 		if(tokens->size == 0){}	//skip checking tokens if token list is empty
 		else
@@ -73,13 +69,31 @@ int main()
 
 					free(tokens->items[i]);	
 					
-					tokens->items[i] = var; 			
+					tokens->items[i] = var;
+
+					//if env var alone is entered
+					if(tokens->items[i][0] == '/' && i <= 0)
+						printf("bash: %s: is a directory\n", tokens->items[i]);
+					if(tokens->items[i][0] != '/' && i <= 0)
+						printf("bash: %s: command not found\n", tokens->items[i]);		
   				}
 				if(*(tokens->items[i]) == '~')
 				{	//~/dir ---> expand and append rest of past
-					char *home = getenv("HOME");
+					char * temp = &(tokens->items[i][1]);
+					char * home = getenv("HOME");
+
+					int totalStrlen = strlen(home) + strlen(temp) + 1;
+
+					char * var = (char*)malloc(totalStrlen);
+					strcpy(var, home);
+					strcat(var, temp);
+
 					free(tokens->items[i]);
-					tokens->items[i] = home; 
+					tokens->items[i] = var;
+
+					//printf("tokens->items[%d] is %s\n", i, tokens->items[i]);
+					if(strlen(temp) <= 0 && i <= 0)
+						printf("bash: %s: Is a directory\n", tokens->items[i]);
 				}		
 			} 
 
@@ -108,11 +122,11 @@ int main()
 			else if(has_slash(tokens->items[0]) == 1){		//executing even if / is an env and not a path to a command
 				printf("user input has slashes\n");
 				execute_command(tokens->items[0], tokens, 0, bg_process, bg_commands);
-				totalCommands++; 
+				totalCommands++;
 			}
 			else{											//defaulting is causing issues if first token is an env or ~
 				search_for_command(tokens->items[0], tokens, bg_process, bg_commands);
-				totalCommands++; 
+				totalCommands++;
 			}
 
 			free(input);
