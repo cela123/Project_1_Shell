@@ -15,15 +15,18 @@ int main()
 {
 	pid_t bg_process[10];
 	char * bg_commands[10];
+	char * running_commands[10];
 	int totalCommands = 0;
+	int breakCondition = 1;
 
 	for(int i = 0; i < 10; i++)		//initialize background processing arrays
 	{
 		bg_process[i] = -1;
 		bg_commands[i] = (char*)malloc(100);
+		running_commands[i] = (char*)malloc(100);
 	}
 
-	while (1) 
+	while (breakCondition) 
 	{
 		int count = 0;
 
@@ -39,6 +42,8 @@ int main()
 				}
 				else
 				{
+					strcpy(running_commands[i], bg_commands[i]);
+					//printf(" running_commands[%d] is %s\n", i, running_commands[i]);
 					count++;
 				}
 			}
@@ -78,7 +83,7 @@ int main()
 						printf("bash: %s: command not found\n", tokens->items[i]);		
   				}
 				if(*(tokens->items[i]) == '~')
-				{	//~/dir ---> expand and append rest of past
+				{	
 					char * temp = &(tokens->items[i][1]);
 					char * home = getenv("HOME");
 
@@ -91,7 +96,7 @@ int main()
 					free(tokens->items[i]);
 					tokens->items[i] = var;
 
-					//printf("tokens->items[%d] is %s\n", i, tokens->items[i]);
+					//if ~ is entered alone
 					if(strlen(temp) <= 0 && i <= 0)
 						printf("bash: %s: Is a directory\n", tokens->items[i]);
 				}		
@@ -105,12 +110,12 @@ int main()
 			}
 			else if(strcmp(tokens->items[0], "cd")==0){
 				printf("executing built-in cd\n");
+
 				if(tokens->items[2] != NULL)	//case for too many arguments
 					printf("error: too many arguments\n"); 
-				else{
+				else
+					cd(tokens->items[1]);
 					
-					cd(tokens->items[1]); 
-				}
 				totalCommands++;
 			}	
 			else if(strcmp(tokens->items[0], "echo")==0){
@@ -120,6 +125,7 @@ int main()
 			}		
 			else if(strcmp(tokens->items[0], "jobs")==0){
 				printf("executing built-in jobs\n");
+				jobs(bg_process, running_commands);
 				totalCommands++;
 			}
 			else if(has_slash(tokens->items[0]) == 1){		//executing even if / is an env and not a path to a command

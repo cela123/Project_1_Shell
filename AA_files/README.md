@@ -5,7 +5,7 @@ Team Members: Alec Amico, Aria Delmar, Andrew Lindsay
 
 Division of Labor:
     Parts 1-4, Alec and Aria
-    Part 5, Aria
+    Part 5, Alec, Aria
     Part 6, Alec
     Part 7, Alec, Aria, and Andrew
     Part 8, Andrew

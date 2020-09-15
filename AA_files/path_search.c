@@ -231,15 +231,10 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation, pi
 		{
 			int count = 0;
 			for(int i = 0; i < 10; i++)
-			{
 				if(bg_process[i] != -1)
-				{
-					//printf("bg_process[%d] is %d\n", i, bg_process[i]);
 					count++;
-				}
-			}
-			//printf("count is %d", count);
-			//printf("[%d] %d\n", count, bg_process[i_count]);
+			
+			printf("[%d] %d\n", count, bg_process[i_count]);
 		}
 			
 
