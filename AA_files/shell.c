@@ -17,7 +17,6 @@ int main()
 	char * bg_commands[10];
 	char * running_commands[10];
 	int totalCommands = 0;
-	int breakCondition = 1;
 
 	for(int i = 0; i < 10; i++)		//initialize background processing arrays
 	{
@@ -26,7 +25,7 @@ int main()
 		running_commands[i] = (char*)malloc(100);
 	}
 
-	while (breakCondition) 
+	while (1) 
 	{
 		int count = 0;
 
@@ -36,26 +35,21 @@ int main()
 			{
 				if(waitpid(bg_process[i], NULL, WNOHANG) != 0)
 				{
-					printf("[%d]+ Done \t\t %s\n", ++count, bg_commands[i]);
-					bg_process[i] = -1;
+					printf(" [%d]+ Done \t\t %s\n", ++count, bg_commands[i]);
+					bg_process[i] = -1;		//reset array slots in function
 					strcpy(bg_commands[i], "");
+					strcpy(running_commands[i], "");
 				}
-				else
+				else	//if process is running copy into running_commands
 				{
 					strcpy(running_commands[i], bg_commands[i]);
-					//printf(" running_commands[%d] is %s\n", i, running_commands[i]);
 					count++;
 				}
 			}
 		}
-
-		printf("totalCommands is: %d\n", totalCommands);
-		
-		//fix cases where getenv($ENVVAR) DNE to null / empty string
 		printf("%s@%s : %s> ", getenv("USER"), getenv("MACHINE"), getenv("PWD"));
 
 		char *input = get_input();
-		//printf("whole input: %s\n", input);
 		tokenlist *tokens = get_tokens(input);
 
 		if(tokens->size == 0){}	//skip checking tokens if token list is empty
@@ -65,6 +59,7 @@ int main()
 			{
       			if(*(tokens->items[i]) == '$')
 				{
+					//appends env var to rest of command 
 					char * temp = getenv(&(tokens->items[i][1]));
 					if (temp == NULL)
 						temp = "";
@@ -84,6 +79,7 @@ int main()
   				}
 				if(*(tokens->items[i]) == '~')
 				{	
+					//appends HOME env var wherever ~ is found
 					char * temp = &(tokens->items[i][1]);
 					char * home = getenv("HOME");
 
@@ -103,13 +99,9 @@ int main()
 			} 
 
 			if(strcmp(tokens->items[0], "exit")==0){
-				//printf("executing built-in exit\n");
 				b_exit(totalCommands); 
-			
 			}
 			else if(strcmp(tokens->items[0], "cd")==0){
-				//printf("executing built-in cd\n");
-
 				if(tokens->items[2] != NULL)	//case for too many arguments
 					printf("error: too many arguments\n"); 
 				else
@@ -118,21 +110,18 @@ int main()
 				totalCommands++;
 			}	
 			else if(strcmp(tokens->items[0], "echo")==0){
-				//printf("executing built-in echo\n");
 				echo(tokens);
 				totalCommands++;
 			}		
 			else if(strcmp(tokens->items[0], "jobs")==0){
-				//printf("executing built-in jobs\n");
 				jobs(bg_process, running_commands);
 				totalCommands++;
 			}
-			else if(has_slash(tokens->items[0]) == 1){		//executing even if / is an env and not a path to a command
-				//printf("user input has slashes\n");
+			else if(has_slash(tokens->items[0]) == 1){		
 				execute_command(tokens->items[0], tokens, 0, bg_process, bg_commands);
 				totalCommands++;
 			}
-			else{											//defaulting is causing issues if first token is an env or ~
+			else{											
 				search_for_command(tokens->items[0], tokens, bg_process, bg_commands);
 				totalCommands++;
 			}
@@ -145,6 +134,7 @@ int main()
 	return 0;
 }
 
+//determines whether not the input has a slash for executing commands based on path
 int has_slash(char* command)
 {
 	int ret = 0; 

@@ -6,9 +6,7 @@
 #include "parser.h"
 #include "built_ins.h"
 
-
 void b_exit(int numCommands){
-    //pid_t pid = getpid();
     waitpid(-1, NULL, 0);
     printf("Commands executed: %d\n", numCommands); 
     exit(0); 
