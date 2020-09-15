@@ -5,7 +5,7 @@ Team Members: Alec Amico, Aria Delmar, Andrew Lindsay
 
 Division of Labor:
     Parts 1-4, Alec and Aria
-    Part 5, Aria
+    Part 5, Alec and Aria
     Part 6, Alec
     Part 7, Alec, Aria, and Andrew
     Part 8, Andrew
@@ -46,7 +46,7 @@ How to compile executables with Makefile
 Known bugs/unfinished project parts:
 
 Extra credit documentation:
-    Shell-ception - the shell can executed within the running shell process
+    Shell-ception - the shell can be executed within the running shell process
 
 Note: Andrew joined the team after Alec and Aria had begun work, which is why Andrew's contributions 
       are not noted until part 7. 
