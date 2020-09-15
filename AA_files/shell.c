@@ -36,7 +36,7 @@ int main()
 			{
 				if(waitpid(bg_process[i], NULL, WNOHANG) != 0)
 				{
-					printf(" [%d]+ Done \t\t %s\n", ++count, bg_commands[i]);
+					printf("[%d]+ Done \t\t %s\n", ++count, bg_commands[i]);
 					bg_process[i] = -1;
 					strcpy(bg_commands[i], "");
 				}
