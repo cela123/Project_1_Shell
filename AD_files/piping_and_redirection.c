@@ -34,7 +34,7 @@ void piping(char* command, tokenlist* input, pid_t* bg_process, char** bg_comman
 
     for(int i = 0; i < input->size-1; i++){
         if(strcmp(input->items[i], "|") == 0){
-            if(first_pipe = -1){
+            if(first_pipe == -1){
                 pipe1_index = i; 
                 first_pipe = i; 
                 numPipes = 1; 
@@ -49,6 +49,7 @@ void piping(char* command, tokenlist* input, pid_t* bg_process, char** bg_comman
         }
 
     }
+    printf("first pipe index: %d\n", first_pipe); 
     printf("time to tokenize cmd1\n"); 
 
     //int cmd1_size = strlen(input->items[0]); 
