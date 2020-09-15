@@ -10,7 +10,7 @@ Division of Labor:
     Part 7, Alec, Aria, and Andrew
     Part 8, Andrew
     Part 9, Alec
-    Part 10, Aria
+    Part 10, Aria, Alec
 
 Contents of tar archive:
     makefile - compiles all of the program files into a single executable "shell". 
@@ -49,6 +49,7 @@ How to compile executables with Makefile
 
 Known bugs/unfinished project parts:
     Piping is not implemented. 
+    There is a warning for implicit declaration of function ‘setenv’ that we could not resolve. 
 
 Extra credit documentation:
     Shell-ception - the shell can be executed within the running shell process
