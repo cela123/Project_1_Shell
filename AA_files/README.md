@@ -5,7 +5,7 @@ Team Members: Alec Amico, Aria Delmar, Andrew Lindsay
 
 Division of Labor:
     Parts 1-4, Alec and Aria
-    Part 5, Alec, Aria
+    Part 5, Alec and Aria
     Part 6, Alec
     Part 7, Alec, Aria, and Andrew
     Part 8, Andrew
@@ -13,7 +13,11 @@ Division of Labor:
     Part 10, Aria
 
 Contents of tar archive:
-    shell.c - 
+    makefile - compiles all of the program files into a single executable "shell". 
+
+    shell.c - Prompts the user for new commands/input from the user and calls the appropriate functions based on the
+              the user's input. Shell.c also keeps track of the number of background processes and the total number
+              of commands executed since the program started. 
 
     parser.h - Header file for parser.c
 
@@ -41,12 +45,13 @@ Contents of tar archive:
     built_ins.c - Implements the functions exit, echo, cd, and jobs. 
 
 How to compile executables with Makefile
-    When the makefile is run with "make" the executable "shell" will b
+    When the makefile is run with "make" the executable "shell" will be created. The executable will launch the program. 
 
 Known bugs/unfinished project parts:
+    Piping is not implemented. 
 
 Extra credit documentation:
-    Shell-ception - the shell can executed within the running shell process
+    Shell-ception - the shell can be executed within the running shell process
 
 Note: Andrew joined the team after Alec and Aria had begun work, which is why Andrew's contributions 
       are not noted until part 7. 
