@@ -54,7 +54,7 @@ How to compile executables with Makefile
     When the makefile is run with "make" the executable "shell" will be created. The executable will launch the program. 
 
 Known bugs/unfinished project parts:
-    Piping only works with one pipe. 
+    Piping has not been fully tested. 
     There is a warning for implicit declaration of function ‘setenv’ that we could not resolve. 
 
 Extra credit documentation:
