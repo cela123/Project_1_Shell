@@ -1,57 +1,71 @@
+#define _POSIX_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "sys/types.h"
+#include <signal.h>
+#include <sys/wait.h>
+#include <fcntl.h>
 #include "parser.h"
-#include "built_ins.h"
 #include "path_search.h"
-
+#include "built_ins.h"
+#include "piping_and_redirection.h"
 
 int has_slash(char*); 
-int has_IO(char*);
 
 int main()
 {
-	int numCommands = 0; 
 	pid_t bg_process[10];
 	char * bg_commands[10];
+	char * running_commands[10];
+	int totalCommands = 0;
+	int breakCondition = 1;
+	
 
-	for(int i = 0; i < 10; i++)
+	for(int i = 0; i < 10; i++)		//initialize background processing arrays
 	{
 		bg_process[i] = -1;
 		bg_commands[i] = (char*)malloc(100);
+		running_commands[i] = (char*)malloc(100);
 	}
 
-	while (1) 
+	while (breakCondition) 
 	{
 		int count = 0;
+		int pipe = 0; 
+
 		for(int i = 0; i < 10; i++)
 		{
 			if(bg_process[i] != -1)
 			{
-				printf("[%d] %d\n", ++count, bg_process[i]);
+				if(waitpid(bg_process[i], NULL, WNOHANG) != 0)
+				{
+					printf("[%d]+ Done \t\t %s\n", ++count, bg_commands[i]);
+					bg_process[i] = -1;
+					strcpy(bg_commands[i], "");
+				}
+				else
+				{
+					strcpy(running_commands[i], bg_commands[i]);
+					//printf(" running_commands[%d] is %s\n", i, running_commands[i]);
+					count++;
+				}
 			}
 		}
 
-		//prompt format USER@MACHINE : PWD > (part 3)
-		printf("%s@%s:%s> ", getenv("USER"), getenv("MACHINE"), getenv("PWD"));
+		//printf("totalCommands is: %d\n", totalCommands);
+		
+		//fix cases where getenv($ENVVAR) DNE to null / empty string
+		printf("%s@%s : %s> ", getenv("USER"), getenv("MACHINE"), getenv("PWD"));
 
-		//collects everything entered by user into input
 		char *input = get_input();
-
-		//separates tokens (by spaces)
+		//printf("whole input: %s\n", input);
 		tokenlist *tokens = get_tokens(input);
 
-		//checks for IO for every input so it auto updates in calls to exec and search
-		int hasIO = has_IO(input); 
-		//Check in case there are no tokens
-		if(tokens->size == 0){}
-
-		else{
-	
+		if(tokens->size == 0){}	//skip checking tokens if token list is empty
+		else
+		{
 			for (int i = 0; i < tokens->size; i++) 
-			{		
-				//dereference env vars (part2)
+			{
       			if(*(tokens->items[i]) == '$')
 				{
 					char * temp = getenv(&(tokens->items[i][1]));
@@ -63,28 +77,16 @@ int main()
 
 					free(tokens->items[i]);	
 					
-					tokens->items[i] = var; 	
-/* 					char * var = (char*)malloc(strlen( &(tokens->items[i][1]) ));
-					var = getenv(&(tokens->items[i][1]));
-					//char *var = getenv(&(tokens->items[i][1])); 
-					printf("token %d: (%s)\n", i, tokens->items[i]);
-					printf("var: %s\n", var);
+					tokens->items[i] = var;
 
-					if(var==NULL){	//if env var dne, replace token with empty string		
-						free(tokens->items[i]);				
-						tokens->items[i] = ""; 
-					}
-					else{		
-						//strcpy(tokens->items[i], var);
-						//if env var does exist replace token with var						
-						tokens->items[i] = var; 							//CURRENTLY DOES NOT WORK
-					}
-					printf("token %d: (%s)\n", i, tokens->items[i]);	 */		
-
+					//if env var alone is entered
+					if(tokens->items[i][0] == '/' && i <= 0)
+						printf("bash: %s: is a directory\n", tokens->items[i]);
+					if(tokens->items[i][0] != '/' && i <= 0)
+						printf("bash: %s: command not found\n", tokens->items[i]);		
   				}
-			
-				else if(tokens->items[i][0] == '~')
-				{
+				if(*(tokens->items[i]) == '~')
+				{	
 					char * temp = &(tokens->items[i][1]);
 					char * home = getenv("HOME");
 
@@ -97,67 +99,62 @@ int main()
 					free(tokens->items[i]);
 					tokens->items[i] = var;
 
-					//printf("tokens->items[%d] is %s\n", i, tokens->items[i]);
+					//if ~ is entered alone
 					if(strlen(temp) <= 0 && i <= 0)
 						printf("bash: %s: Is a directory\n", tokens->items[i]);
 				}
-				
-	 
-			}
-			//checking if input is a built-in command and executing if it is
-
-			/* if(isEnv == 0)
-			{ */
-				if(strcmp(tokens->items[0], "exit")==0)
-				{
-					printf("executing built-in exit\n"); 
-					exit(numCommands); 
-					exit(0); 
-				}
-				else if(strcmp(tokens->items[0], "cd")==0){
-					printf("executing built-in cd\n"); 
-					if(tokens->items[2] != NULL)	//case for too many arguments
-						printf("error: too many arguments\n"); 
-					else{
-						
-						cd(tokens->items[1]); 
-					}
-				}	
-				else if(strcmp(tokens->items[0], "echo")==0){
-					printf("executing built-in echo\n"); 
-					echo(tokens); 
+				if(hasPipe(tokens->items[i]) == 1){
+					pipe = 1; 
 				}		
-				else if(strcmp(tokens->items[0], "jobs")==0){
-					printf("executing built-in jobs\n"); 
-				}
-			//checks for '/' in user input and executes given input
-				else if(has_slash(tokens->items[0]) == 1){
-					printf("user input has slashes\n");
-					execute_command(tokens->items[0], tokens, 0); 
-				}
-				else{
-					search_for_command(tokens->items[0], tokens);
-				}	
-			/* } */
+			} 
+
+			if(strcmp(tokens->items[0], "exit")==0){
+				//printf("executing built-in exit\n");
+				b_exit(totalCommands); 
 			
+			}
+			else if(strcmp(tokens->items[0], "cd")==0){
+				//printf("executing built-in cd\n");
 
-			for(int i =0; i<tokens->size; i++)
-				printf("token %d: %s\n", i, tokens->items[i]); 
-		
-		
-		free(input);
-		free_tokens(tokens);
+				if(tokens->items[2] != NULL)	//case for too many arguments
+					printf("error: too many arguments\n"); 
+				else
+					cd(tokens->items[1]);
+					
+				totalCommands++;
+			}	
+			else if(strcmp(tokens->items[0], "echo")==0){
+				//printf("executing built-in echo\n");
+				echo(tokens);
+				totalCommands++;
+			}		
+			else if(strcmp(tokens->items[0], "jobs")==0){
+				//printf("executing built-in jobs\n");
+				jobs(bg_process, running_commands);
+				totalCommands++;
+			}
+			else if(has_slash(tokens->items[0]) == 1){		//executing even if / is an env and not a path to a command
+				//printf("user input has slashes\n");
+				execute_command(tokens->items[0], tokens, 0, bg_process, bg_commands);
+				totalCommands++;
+			}
+			else if(pipe == 1){
+				piping(tokens->items[0], tokens, bg_process, bg_commands); 
+			}
+			
+			else{											//defaulting is causing issues if first token is an env or ~
+				search_for_command(tokens->items[0], tokens, bg_process, bg_commands);
+				totalCommands++;
+			}
 
+			free(input);
+			free_tokens(tokens);
 		}
-
-
-
 	}
 
 	return 0;
 }
 
-//returns 1 if command has a slash, returns 0 if it doesn't
 int has_slash(char* command)
 {
 	int ret = 0; 
@@ -169,13 +166,3 @@ int has_slash(char* command)
 	return ret; 
 }
 
-//returns 1 if input has > or <, returns 0 if it doesn't
-int has_IO(char* input){
-	int ret = 0; 
-	for(int i=0; i<strlen(input); i++){
-		if(input[i] == '>' || input[i] == '<')
-			ret = 1; 
-	}
-
-	return ret; 
-}

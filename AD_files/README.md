@@ -10,10 +10,14 @@ Division of Labor:
     Part 7, Alec, Aria, and Andrew
     Part 8, Andrew
     Part 9, Alec
-    Part 10, Aria
+    Part 10, Aria, Alec
 
 Contents of tar archive:
-    shell.c - 
+    makefile - compiles all of the program files into a single executable "shell". 
+
+    shell.c - Prompts the user for new commands/input from the user and calls the appropriate functions based on the
+              the user's input. Shell.c also keeps track of the number of background processes and the total number
+              of commands executed since the program started. 
 
     parser.h - Header file for parser.c
 
@@ -41,9 +45,11 @@ Contents of tar archive:
     built_ins.c - Implements the functions exit, echo, cd, and jobs. 
 
 How to compile executables with Makefile
-    When the makefile is run with "make" the executable "shell" will b
+    When the makefile is run with "make" the executable "shell" will be created. The executable will launch the program. 
 
 Known bugs/unfinished project parts:
+    Piping is not implemented. 
+    There is a warning for implicit declaration of function ‘setenv’ that we could not resolve. 
 
 Extra credit documentation:
     Shell-ception - the shell can be executed within the running shell process
