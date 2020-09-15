@@ -47,7 +47,7 @@ Contents of tar archive:
     piping_and_redirection.h - Header file for piping_and_redirection.c
 
     piping_and_redirection.c - Implements execution of piping. Checks for if one or two pipes are present in input,
-                               tokenizes the commands accordingly, then calls search_for_command() to find an execute the
+                               tokenizes the commands accordingly, then calls search_for_command() to find and execute the
                                commands.  
 
 How to compile executables with Makefile
@@ -59,7 +59,7 @@ Known bugs/unfinished project parts:
 
 Extra credit documentation:
     Shell-ception - the shell can be executed within the running shell process.
-    Piping (though with only one pipe) works with IO redirection. 
+    Piping works with IO redirection. 
 
 Note: Andrew joined the team after Alec and Aria had begun work, which is why Andrew's contributions 
       are not noted until part 7. 

@@ -211,7 +211,7 @@ void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation, pi
 		}
 		else if(isBackground == 0 && isBoth == 0)
 		{
-			printf("tokens->items[0]: %s\n, tokens->items: %s\n", tokens->items[0], tokens->items);
+			//printf("tokens->items[0]: %s\n, tokens->items: %s\n", tokens->items[0], tokens->items);
 			execv(tokens->items[0], tokens->items);		//replace [0] in tokens with the cmdpath
 		}
 		exit(1);		
