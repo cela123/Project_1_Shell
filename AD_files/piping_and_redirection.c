@@ -29,6 +29,7 @@ void piping(char* command, tokenlist* input, pid_t* bg_process, char** bg_comman
     int cmd3_index = -1; 
     tokenlist * cmd1 = new_tokenlist(); 
     tokenlist * cmd2 = new_tokenlist(); 
+    tokenlist * cmd3 = new_tokenlist(); 
     
 
     for(int i = 0; i < input->size-1; i++){
@@ -51,14 +52,26 @@ void piping(char* command, tokenlist* input, pid_t* bg_process, char** bg_comman
     printf("time to tokenize cmd1\n"); 
 
     //int cmd1_size = strlen(input->items[0]); 
-    for(int i = 0; i < pipe1_index; i++){
+    for(int i = 0; i < first_pipe; i++){
         add_token(cmd1, input->items[i]); 
     } 
     printf("time to tokenize cmd2\n"); 
     
     int j = cmd2_index; 
-    while(input->items[j] != NULL)
-        add_token(cmd2, input->items[j++]);
+    if(numPipes == 1){
+        while(input->items[j] != NULL)
+            add_token(cmd2, input->items[j++]);
+    }
+    else if(numPipes == 2){
+        while(j != pipe2_index)
+            add_token(cmd2, input->items[j++]);
+        
+        j = cmd3_index; 
+        while(input->items[j] != NULL)
+            add_token(cmd3, input->items[j++]);
+    }
+
+
 
     
     for(int i = 0; i < cmd1->size; i ++)
@@ -100,6 +113,63 @@ void piping(char* command, tokenlist* input, pid_t* bg_process, char** bg_comman
         close(p_fds[1]);
         waitpid(pid1, NULL, 0);  
         waitpid(pid2, NULL, 0);  
+    }
+    if(numPipes == 2){
+        int p_fds1[2];
+        int p_fds2[2];
+        pipe(p_fds1); 
+        pipe(p_fds2); 
+
+        int pid1 = fork();
+        if(pid1 == 0){
+            close(p_fds1[0]); 
+            close(p_fds2[0]); 
+            close(p_fds2[1]); 
+            //redirect stdout to be input of pipe1
+            close(STDOUT_FILENO); 
+            dup(p_fds1[1]); 
+            close(p_fds1[1]); 
+            search_for_command(cmd1->items[0], cmd1, bg_process, bg_commands);
+            //execv(input->items[0], cmd1);
+            exit(1); 
+        }    
+
+        int pid2 = fork();
+        if(pid2 == 0){ 
+            close(p_fds1[1]); 
+            close(p_fds2[0]); 
+            //redirect stdin to be output of pipe1
+            close(STDIN_FILENO);
+            dup(p_fds1[0]); 
+            close(p_fds1[0]); 
+            //redirect stdout to be input of pipe2
+            close(STDOUT_FILENO); 
+            dup(p_fds2[1]); 
+            close(p_fds2[1]); 
+            search_for_command(cmd2->items[0], cmd2, bg_process, bg_commands);
+            exit(1); 
+        }
+
+        int pid3 = fork();  
+        if(pid3 == 0){
+            close(p_fds1[0]); 
+            close(p_fds1[1]); 
+            close(p_fds2[1]); 
+            //redirect stdin to be output of pipe2
+            close(STDIN_FILENO);
+            dup(p_fds2[0]); 
+            close(p_fds2[0]); 
+            search_for_command(cmd3->items[0], cmd3, bg_process, bg_commands);
+            exit(1); 
+        }
+        close(p_fds1[0]); 
+        close(p_fds1[1]);
+        close(p_fds2[0]);
+        close(p_fds2[1]);
+        waitpid(pid1, NULL, 0);  
+        waitpid(pid2, NULL, 0);  
+        waitpid(pid3, NULL, 0);    
+
     }
 
 }
