@@ -101,5 +101,4 @@ void piping(char* command, tokenlist* input, pid_t* bg_process, char** bg_comman
         waitpid(pid1, NULL, 0);  
         waitpid(pid2, NULL, 0);  
     }
-
 }
