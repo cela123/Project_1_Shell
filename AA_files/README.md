@@ -8,7 +8,7 @@ Division of Labor:
     Part 5, Alec and Aria
     Part 6, Alec
     Part 7, Alec, Aria, and Andrew
-    Part 8, Andrew
+    Part 8, Aria, Andrew
     Part 9, Alec
     Part 10, Aria, Alec
 
@@ -44,15 +44,22 @@ Contents of tar archive:
 
     built_ins.c - Implements the functions exit, echo, cd, and jobs. 
 
+    piping_and_redirection.h - Header file for piping_and_redirection.c
+
+    piping_and_redirection.c - Implements execution of piping. Checks for if one or two pipes are present in input,
+                               tokenizes the commands accordingly, then calls search_for_command() to find an execute the
+                               commands.  
+
 How to compile executables with Makefile
     When the makefile is run with "make" the executable "shell" will be created. The executable will launch the program. 
 
 Known bugs/unfinished project parts:
-    Piping is not implemented. 
+    Piping only works with one pipe. 
     There is a warning for implicit declaration of function ‘setenv’ that we could not resolve. 
 
 Extra credit documentation:
-    Shell-ception - the shell can be executed within the running shell process
+    Shell-ception - the shell can be executed within the running shell process.
+    Piping (though with only one pipe) works with IO redirection. 
 
 Note: Andrew joined the team after Alec and Aria had begun work, which is why Andrew's contributions 
       are not noted until part 7. 
