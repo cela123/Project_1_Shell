@@ -4,279 +4,250 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/wait.h>
-#include <sys/types.h>
-#include "parser.h"
 #include "path_search.h"
 
-int hasPipe = 0;
-int pipe_count = 0;
-tokenlist** parsedPipes;
-
-void search_for_command(char *command, tokenlist *tokens)
+void search_for_command (char* command, tokenlist* tokens, pid_t* bg_process, char** bg_commands)
 {
-	char *mainPATH = getenv("PATH");
+	char * mainPATH = getenv("PATH");
 
-	char *copyPATH = malloc(strlen(mainPATH));
+	char * copyPATH = malloc(strlen(mainPATH));
 	strcpy(copyPATH, mainPATH);
-
-	char **parsedPATH = NULL;
-	char *tok = strtok(copyPATH, ":");
+	
+	char ** parsedPATH = NULL;
+	char * tok = strtok (copyPATH, ":");
 	int size = 0;
-	tokenlist** tok_list;
 
 	//allocates space in array for each individual path
-	while (tok)
+	while(tok)
 	{
-		parsedPATH = realloc(parsedPATH, (sizeof(char *) * ++size));
+		parsedPATH = realloc(parsedPATH, (sizeof(char*) * ++size));
 
 		if (parsedPATH == NULL)
 			exit(-1);
 
-		parsedPATH[size - 1] = tok; //sets char pointer at size-1 to the token
+		parsedPATH[size-1] = tok;		//sets char pointer at size-1 to the token
 		tok = strtok(NULL, ":");
 	}
 
 	//null-termination of array
-	parsedPATH = realloc(parsedPATH, sizeof(char *) * size + 1);
+	parsedPATH = realloc (parsedPATH, sizeof(char*) * size+1);
 	parsedPATH[size] = 0;
 
 	//append command to a temp variable that is overwritten in each iteration to check then next path
-
+	
 	int i;
 	for (i = 0; i < size; i++)
-	{
-		if (parsedPATH[i] != NULL)
+  	{
+		if(parsedPATH[i] != NULL)
 		{
 			int size_0 = strlen(parsedPATH[i]) + strlen(command) + 1;
-			char *temp_command = (char *)malloc(size_0);
+			char * temp_command = (char*)malloc(size_0);
 			strcpy(temp_command, parsedPATH[i]);
 			strcat(temp_command, "/");
 			strcat(temp_command, command);
 			//printf("temp_command at %d: %s\n", i, temp_command);
-			if (does_command_exist(temp_command))
+			if(does_command_exist(temp_command))
 			{
-				printf("Running Command\n"); //insert command execution here
-				execute_command(temp_command, tokens, 1);
-				printf("After running command\n");
-
-				break;
-			}
-			else if(hasPipe)
-			{
-				tok_list = partitionPipes((tokenlist*)temp_command);
-				printf("tokens: %s\n", tok_list[0]);
-			execute_command(temp_command, tok_list[0], 1);
-			break;
+				execute_command(temp_command, tokens, 1, bg_process, bg_commands);
+				break;		
 			}
 		}
 	}
 
-	if (size == i && !hasPipe)
+	if (size == i)
 		printf("command not found\n");
-
 
 	free(parsedPATH);
 }
 
-void execute_command(char *cmdpath, tokenlist *tokens, int checkCallLocation)
+
+
+void execute_command(char* cmdpath, tokenlist* tokens, int checkCallLocation, pid_t* bg_process, char** bg_commands)
 {
+	//printf("entering execute_command()\n");
 	int isOutput = 0;
+	int isBackground = 0;
+	int isBackgroundFound = 0;
 	int isInput = 0;
 	int isBoth = 0;
-	int fd_in = 0;
+	int isPipe = 0;
+	int fd_in = 0; 
 	int fd_out = -1;
 	int store_out_index = -1;
 	int store_in_index = -1;
-	int store_pipe_index = -1;
 	int lowest_index = 0;
-	char *infile = NULL;
-	char *outfile = NULL;
-	int pipettes[2];
-	
-	tokenlist *temp = new_tokenlist();
+	int i_count = 0;
+	int k_count = 0;
+	char * infile = NULL;
+	char * outfile = NULL;
+	tokenlist * temp_io = new_tokenlist();
+	tokenlist * temp_bg = new_tokenlist();
 
-	if (checkCallLocation == 1)
-		free(tokens->items[0]); //free memory at this space so we can replace
+	if(checkCallLocation == 1)
+		free(tokens->items[0]);	//free memory at this space so we can replace
 
 	tokens->items[0] = cmdpath;
 
-	for (int i = 0; i < tokens->size - 1; i++)
+	//<------------IO Processing Logic ---------------------->
+	for(int i = 0; i < tokens->size-1; i++)
 	{
-		printf("token %d: (%s)\n", i, tokens->items[i]);
-
-		if (strcmp(tokens->items[i], ">") == 0) //output redir
+		//printf("token %d: (%s)\n", i, tokens->items[i]);
+		if(strcmp(tokens->items[i], ">") == 0)
 		{
-			printf("found output redir '>'\n");
+			//printf("found output redir '>'\n"); 
 			isOutput = 1;
 			store_out_index = i;			//location of > if it exists
-			outfile = tokens->items[i + 1]; //outfile will be token after >
+			outfile = tokens->items[i+1];	//outfile will be token after >
 
-			fd_out = open(outfile, O_WRONLY | O_CREAT, 0644);
-			if ((fd_out) < 0)
+			if((fd_out = open(outfile, O_WRONLY | O_CREAT, 0644)) < 0)
 			{
 				perror("Output file could not be opened");
 				return;
 			}
 		}
-		if (strcmp(tokens->items[i], "<") == 0)
+		if(strcmp(tokens->items[i], "<") == 0)
 		{
-			printf("found input redir '<'\n"); //input redir
-			isInput = 1;
+			//printf("found input redir '<'\n"); 
+			isInput = 1; 	
 			store_in_index = i;
-			infile = tokens->items[i + 1];
-
-			fd_in = open(infile, O_RDONLY, 0644);
-			if ((fd_in) < 0)
+			infile = tokens->items[i+1];
+			
+			if((fd_in = open(infile, O_RDONLY, 0644)) < 0)
 			{
 				perror("Input file could not be opened");
 				return;
 			}
 		}
+	} 
 
-		if (strcmp(tokens->items[i], "|") == 0)
-		{ //piping
-			
-			hasPipe = 1;
-			pipe_count++;
-			printf("\tfound pipe '|' (in path_search.c)\t # of pipes = %d \n", pipe_count);
-			store_pipe_index = i;
-		
-			pipe(pipettes);
-			dup(pipettes[0]);
-			dup(pipettes[1]);
-		}
-	}
-
-	if(store_out_index)
-		printf("\t'>' is located at index %d\n", store_out_index);
-	if(store_in_index)
-		printf("\t'<' is located at index %d\n", store_in_index);
-	if(hasPipe)
-		printf("\t'|' is located at index %d\n", store_pipe_index);
-
-	if (store_in_index == -1 && store_out_index > 0)
+	if(store_in_index == -1 && store_out_index > 0)
 	{
-		printf("there is only output redirection\n\n");
+		//printf("there is only output redirection\n\n"); 
 		for (int k = 0; k < store_out_index; k++)
-			add_token(temp, tokens->items[k]);
+			add_token(temp_io, tokens->items[k]);
 	}
-	else if (store_in_index > 0 && store_out_index == -1)
+	else if(store_in_index > 0 && store_out_index == -1)
 	{
-		printf("there is only input redirection\n\n");
+		//printf("there is only input redirection\n\n"); 
 		for (int k = 0; k < store_in_index; k++)
-			add_token(temp, tokens->items[k]);
+			add_token(temp_io, tokens->items[k]);
 	}
-	else if (store_in_index > 0 && store_out_index > 0) //if both input and output redir are present
+	else if(store_in_index > 0 && store_out_index > 0)
 	{
-		if (store_in_index > store_out_index) //if the output redir comes first
+		//printf("there is both input and output redirection\n");
+		if(store_in_index > store_out_index)
 			lowest_index = store_out_index;
-		else if (store_in_index < store_out_index) //if the input redir comes first
+		else if(store_in_index < store_out_index)	//if the input redir comes first
 			lowest_index = store_in_index;
-
-		for (int k = 0; k < lowest_index; k++)
-				add_token(temp, tokens->items[k]);
-
-			
+		
+		for(int k = 0; k < lowest_index; k++)
+			add_token(temp_io, tokens->items[k]);
 	}
-	else if (hasPipe)
-	{
-		for (int k = 0; k < tokens->size; k++)
-		{
-			if (tokens->items[k] != "|")
-				add_token(temp, tokens->items[k]);
-		}
-	}
+
+	//determine if there is both input and output or not for background processing
+	if(isInput == 1 && isOutput == 1)
+		isBoth = 1;
+	else
+		isBoth = 0;
 	
-	for (int k = 0; k < temp->size; k++)
-		printf("%d: %s\n", k, temp->items[k]);
+	//printf("tokens->items[tokens->size-1] = %s\n", tokens->items[tokens->size-1]);
 
-	//printf("isOutput: %d\nisInput: %d\nisBoth: %d\n", isOutput, isInput, isBoth);
-
-	pid_t pid1 = fork();
-
-	if (pid1 == 0)
+	if(strcmp(tokens->items[tokens->size-1], "&") == 0)
 	{
-		if (hasPipe == 1)
+		isBackground = 1;
+		//printf("& was found\n");
+		k_count = 0;
+		for(i_count = 0; i_count < 10; i_count++)
 		{
-			printf("\thasPipe, running pid1\n");
-			close(pipettes[0]);
-			//redirect stdout to be input of pipe
-			close(STDOUT_FILENO);
-			dup(pipettes[1]);
-			close(pipettes[1]);
-			execv(temp->items[0], temp->items);
-		}
-		printf("\n\n");
-		if (isInput == 0 && isOutput == 0)
-		{
-			execv(tokens->items[0], tokens->items);
+			//printf("i_count is now: %d\n", i_count);
+			if(bg_process[i_count] == -1)		//make sure to reset when a pid is finished
+			{
+				while(tokens->items[k_count] != NULL)
+				{
+					if (k_count == 0)
+						strcpy(bg_commands[i_count], tokens->items[k_count]);
+					else
+						strcat(bg_commands[i_count], tokens->items[k_count]);
+
+					strcat(bg_commands[i_count], " ");
+					k_count++;
+				}
+				break;
+			}
 		}
 
-		if (isInput == 1)
+		for(int i = 0; i < tokens->size-1; i++)
 		{
-			printf("changing input file descriptors\n");
+			add_token(temp_bg, tokens->items[i]);
+			//printf("temp_bg_token(%d) = %s\n", i, temp_bg->items[i]);
+		}
+		//printf("i_count is now: %d\n", i_count);
+	}
+
+	pid_t pid = fork();
+
+	if(isBackground == 1)
+		bg_process[i_count] = pid;
+
+	if (pid == 0)		//for some reason, this is getting called more then once occassionally
+	{	
+		if(isInput == 1)
+		{	
 			close(STDIN_FILENO);
 			dup(fd_in);
 			close(fd_in);
+			execv(temp_io->items[0], temp_io->items);
 		}
-		if (isOutput == 1)
-		{
-			printf("changing output file descriptors\n");
+		if(isOutput == 1)
+		{ 
 			close(STDOUT_FILENO);
 			dup(fd_out);
 			close(fd_out);
+			execv(temp_io->items[0], temp_io->items);
 		}
-
-		execv(temp->items[0], temp->items);
-
-		exit(1);
-	}
-	//check for piping first{}
-	if (hasPipe == 1)
-	{
-		pid_t pid2 = fork();
-		if (pid2 == 0)
+		if(isBackground == 1 && isBoth == 0)
 		{
-			printf("\thasPipe, running pid2\n");
-			//redirect stdin to be output of pipe
-			close(pipettes[1]);
-			close(STDIN_FILENO);
-			dup(pipettes[0]);
-			close(pipettes[0]);
+			execv(temp_bg->items[0], temp_bg->items);
 		}
-		else
+		else if(isBackground == 0 && isBoth == 0)
 		{
-			free_tokens(temp);
-
-			if (isOutput == 1)
-				close(fd_out);
-			if (isInput == 1)
-				close(fd_in);
-
-			waitpid(pid1, NULL, 0);
-			waitpid(pid2, NULL, 0);
-			printf("\n\nChild exited\n");
-			return; //this waits for both processes in the event of piping
+			printf("tokens->items[0]: %s\n, tokens->items: %s\n", tokens->items[0], tokens->items);
+			execv(tokens->items[0], tokens->items);		//replace [0] in tokens with the cmdpath
 		}
+		exit(1);		
 	}
 	else
 	{
-		free_tokens(temp);
+		free_tokens(temp_io);
+		free_tokens(temp_bg);
 
-		if (isOutput == 1)
+		if(isOutput == 1)
 			close(fd_out);
-		if (isInput == 1)
+		if(isInput == 1)
 			close(fd_in);
+		
+		if(isBackground == 0)
+			waitpid(pid, NULL, 0);
+		else
+		{
+			int count = 0;
+			for(int i = 0; i < 10; i++)
+				if(bg_process[i] != -1)
+					count++;
+			
+			printf("[%d] %d\n", count, bg_process[i_count]);
+		}
+			
 
-		waitpid(pid1, NULL, 0);
-		printf("\n\nChild exited\n");
+		//printf("Child exited\n");
 	}
+	
 }
 
 // checks for exists of a command
-int does_command_exist(char *path)
+int does_command_exist(char* path)
 {
-	FILE *check = fopen(path, "r");
+	FILE * check = fopen(path, "r");
 	if (check == NULL)
 		return 0;
 	fclose(check);
