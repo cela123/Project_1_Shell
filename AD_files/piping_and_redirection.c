@@ -49,14 +49,14 @@ void piping(char* command, tokenlist* input, pid_t* bg_process, char** bg_comman
         }
 
     }
-    printf("first pipe index: %d\n", first_pipe); 
-    printf("time to tokenize cmd1\n"); 
+    //printf("first pipe index: %d\n", first_pipe); 
+    //printf("time to tokenize cmd1\n"); 
 
     //int cmd1_size = strlen(input->items[0]); 
     for(int i = 0; i < first_pipe; i++){
         add_token(cmd1, input->items[i]); 
     } 
-    printf("time to tokenize cmd2\n"); 
+    //printf("time to tokenize cmd2\n"); 
     
     int j = cmd2_index; 
     if(numPipes == 1){
@@ -75,11 +75,11 @@ void piping(char* command, tokenlist* input, pid_t* bg_process, char** bg_comman
 
 
     
-    for(int i = 0; i < cmd1->size; i ++)
+/*     for(int i = 0; i < cmd1->size; i ++)
         printf("cmd1 token %d: %s\n",i, cmd1->items[i]); 
 
     for(int i = 0; i < cmd2->size; i ++)
-        printf("cmd2 token %d: %s\n",i, cmd2->items[i]); 
+        printf("cmd2 token %d: %s\n",i, cmd2->items[i]);  */
 
     if(numPipes == 1){
         int p_fds[2];
