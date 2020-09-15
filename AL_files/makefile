@@ -20,4 +20,4 @@ shell.o: shell.c
 	gcc -c -std=c99 shell.c
 
 clean:
-	rm *.o shell.x
+	rm *.o shell
