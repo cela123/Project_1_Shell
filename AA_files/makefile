@@ -1,8 +1,5 @@
 shell: parser.o shell.o path_search.o built_ins.o
-	gcc -o shell.x -std=c99 parser.o shell.o path_search.o built_ins.o
-
-debug: parser.o shell.o path_search.o
-	gcc -o shell.x -std=c99 parser.o shell.o path_search.o -g
+	gcc -o shell -std=c99 parser.o shell.o path_search.o built_ins.o
 
 path_search.o: path_search.c path_search.h
 	gcc -c -std=c99 path_search.c
