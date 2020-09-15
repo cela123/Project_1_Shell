@@ -7,11 +7,13 @@
 
 
 void exit(int numCommands){
-    waitpid(-1, NULL, 0);
+    pid_t pid;
+    printf("Commands executed: %d", numCommands);
+    
+    while(pid = waitpid(-1, NULL, 0)){}
 }
 
 void cd(char* path){
-
     if(path == NULL){ //if no arg is given for cd
         chdir(getenv("HOME")); 
         char* cwd = getcwd(NULL, 0); 
@@ -27,12 +29,17 @@ void cd(char* path){
     }
 }
 
-
-
 void echo(tokenlist* input){
-    for(int i = 1; i < input->size; i++){
+    for(int i = 1; i < input->size; i++)
         printf("%s ", input->items[i]);
-        
-    }
+
     printf("\n"); 
+}
+
+void jobs(pid_t* bg_process, char ** running_commands)
+{
+    int count = 0;
+    for(int i = 0; i < 10; i++)
+        if(bg_process[i] != -1)
+            printf("[%d]+ %d\t%s\n", ++count, bg_process[i], running_commands[i]);
 }
