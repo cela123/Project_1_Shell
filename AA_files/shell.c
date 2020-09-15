@@ -103,12 +103,12 @@ int main()
 			} 
 
 			if(strcmp(tokens->items[0], "exit")==0){
-				printf("executing built-in exit\n");
+				//printf("executing built-in exit\n");
 				b_exit(totalCommands); 
 			
 			}
 			else if(strcmp(tokens->items[0], "cd")==0){
-				printf("executing built-in cd\n");
+				//printf("executing built-in cd\n");
 
 				if(tokens->items[2] != NULL)	//case for too many arguments
 					printf("error: too many arguments\n"); 
@@ -118,17 +118,17 @@ int main()
 				totalCommands++;
 			}	
 			else if(strcmp(tokens->items[0], "echo")==0){
-				printf("executing built-in echo\n");
+				//printf("executing built-in echo\n");
 				echo(tokens);
 				totalCommands++;
 			}		
 			else if(strcmp(tokens->items[0], "jobs")==0){
-				printf("executing built-in jobs\n");
+				//printf("executing built-in jobs\n");
 				jobs(bg_process, running_commands);
 				totalCommands++;
 			}
 			else if(has_slash(tokens->items[0]) == 1){		//executing even if / is an env and not a path to a command
-				printf("user input has slashes\n");
+				//printf("user input has slashes\n");
 				execute_command(tokens->items[0], tokens, 0, bg_process, bg_commands);
 				totalCommands++;
 			}
