@@ -112,6 +112,7 @@ int main()
 				{
 					printf("executing built-in exit\n"); 
 					exit(numCommands); 
+					exit(0); 
 				}
 				else if(strcmp(tokens->items[0], "cd")==0){
 					printf("executing built-in cd\n"); 

@@ -27,8 +27,6 @@ void cd(char* path){
     }
 }
 
-
-
 void echo(tokenlist* input){
     for(int i = 1; i < input->size; i++){
         printf("%s ", input->items[i]);

@@ -99,7 +99,9 @@ int main()
 
 			if(strcmp(tokens->items[0], "exit")==0){
 				printf("executing built-in exit\n");
-				exit(totalCommands);
+				b_exit(totalCommands); 
+
+				
 			}
 			else if(strcmp(tokens->items[0], "cd")==0){
 				printf("executing built-in cd\n");

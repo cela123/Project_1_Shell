@@ -1,13 +1,17 @@
 #include <sys/wait.h>
 #include <stdio.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include "parser.h"
 #include "built_ins.h"
 
 
-void exit(int numCommands){
+void b_exit(int numCommands){
+    //pid_t pid = getpid();
     waitpid(-1, NULL, 0);
+    printf("Commands executed: %d\n", numCommands); 
+    exit(0); 
 }
 
 void cd(char* path){
