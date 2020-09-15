@@ -1,10 +1,6 @@
+#include "parser.h"
+#include "sys/types.h"
 
-//#include "parser.h"
-//Part 5) $PATH search
-//when a command is not starting with / or built-in
-//search for the command within $PATH
-//if not within $PATH then display an error message command not found
-
-void search_for_command (char*, tokenlist*);
-void execute_command(char*, tokenlist*, int);
+void search_for_command (char*, tokenlist*, pid_t*, char**);
+void execute_command(char*, tokenlist*, int, pid_t*, char**);
 int does_command_exist(char*);

@@ -1,3 +1,6 @@
+#ifndef PARSER_H__
+#define PARSER_H__
+
 typedef struct {
 	int size;
 	char **items;
@@ -9,5 +12,4 @@ char *get_input(void);
 tokenlist *get_tokens(char *input);
 void free_tokens(tokenlist *tokens);
 
-tokenlist** partitionPipes(tokenlist* cmdStr);
-char* strsep(char** cmdStr, const char* delim);
+#endif
